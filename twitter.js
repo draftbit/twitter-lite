@@ -36,7 +36,7 @@ const baseHeaders = {
 class Twitter {
   constructor(options) {
     const config = Object.assign({}, defaults, options);
-    this.authType = options.bearer_token ? "App" : "User";
+    this.authType = config.bearer_token ? "App" : "User";
     this.client = createOauthClient({
       key: config.consumer_key,
       secret: config.consumer_secret
