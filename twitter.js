@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const SubIn = require("sub-in");
-const Fetch = require("node-fetch");
+const Fetch = require("cross-fetch");
 
 const getUrl = subdomain => SubIn("https://$0.twitter.com/1.1", [subdomain]);
 const createOauthClient = ({ key, secret }) => {
@@ -80,5 +80,17 @@ class Twitter {
     return results;
   }
 }
+
+const client = new Twitter({
+  subdomain: "api",
+  consumer_key: "VckZuP97Jab6I28SmhkFLqa3q",
+  consumer_secret: "e3e5jhMus4BMm0RRlVgGLd0IclP81MbLLCaDwYhOmEfX60y5wh",
+  access_token_key: "25711093-HOPWfdkXbfM6ybB6fkTFUWhmDyVLVipljAn5Fb7EN",
+  access_token_secret: "GZg77Wxlq0gxwNbdJxeFHgudBi7hyj65PUaA5dCMetjez"
+});
+
+client.get("account/verify_credentials").then(results => {
+  console.log("results", results);
+});
 
 module.exports = Twitter;

@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A tiny, full-featured client / server library for the Twitter API",
   "source": "twitter.js",
   "main": "dist/twitter.js",
@@ -24,6 +24,7 @@
     "twitter api"
   ],
   "dependencies": {
+    "cross-fetch": "^1.1.1",
     "node-fetch": "^2.0.0",
     "oauth-1.0a": "^2.2.4",
     "sub-in": "^1.0.2"
