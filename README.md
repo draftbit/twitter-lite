@@ -1,4 +1,4 @@
-# Twitter Lite [![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/preposterous/twitter-lite.svg?branch=master)](https://travis-ci.org/preposterous/twitter-lite)
+# Twitter Lite [![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/Preposterous/twitter-lite.svg?branch=master)](https://travis-ci.org/Preposterous/twitter-lite)
 
 A tiny (591B), fully-featured, client & server library for the Twitter API
 
