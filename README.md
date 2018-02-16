@@ -80,6 +80,24 @@ TBD
 
 I don't know shit about streams. If you can help make this work with streams, I would appreciate & encourage it!
 
+## Troubleshooting
+
+### API Errors
+
+Api errors are returned (with "catch" in the Promise api or with "err" param in the callback api) as an array of errors.
+Thus errors described in twitter docs for example as:
+```JSON
+ { "errors": [ { "code": 88, "message": "Rate limit exceeded" } ] }
+
+```
+
+Would return as :
+
+```
+ [ { "code": 88, "message": "Rate limit exceeded" } ] 
+
+```
+
 ## Credit
 
 Over the years, thanks to:
