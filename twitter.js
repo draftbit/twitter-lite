@@ -59,7 +59,7 @@ class Twitter {
     return results;
   }
 
-  async post(resource) {
+  async post(resource, body) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
       method: "POST"
@@ -70,7 +70,12 @@ class Twitter {
 
     const results = await Fetch(requestData.url, {
       method: "POST",
-      headers
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...headers
+      },
+      body: JSON.stringify(body)
     }).then(res => res.json());
     return results;
   }
