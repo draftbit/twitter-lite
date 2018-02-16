@@ -36,6 +36,7 @@ const baseHeaders = {
 class Twitter {
   constructor(options) {
     const config = Object.assign({}, defaults, options);
+    this.authType = options.bearer_token ? "App" : "User";
     this.client = createOauthClient({
       key: config.consumer_key,
       secret: config.consumer_secret
@@ -47,6 +48,7 @@ class Twitter {
     };
 
     this.url = getUrl(config.subdomain);
+    this.config = config;
   }
 
   async get(resource) {
@@ -55,9 +57,16 @@ class Twitter {
       method: "GET"
     };
 
-    const headers = this.client.toHeader(
-      this.client.authorize(requestData, this.token)
-    );
+    let headers = {};
+    if (this.authType === "User") {
+      headers = this.client.toHeader(
+        this.client.authorize(requestData, this.token)
+      );
+    } else {
+      headers = {
+        Authorization: `Bearer ${this.config.bearer_token}`
+      };
+    }
 
     const results = await Fetch(requestData.url, { headers }).then(res =>
       res.json()
@@ -70,9 +79,17 @@ class Twitter {
       url: `${this.url}/${resource}.json`,
       method: "POST"
     };
-    const headers = this.client.toHeader(
-      this.client.authorize(requestData, this.token)
-    );
+
+    let headers = {};
+    if (this.authType === "User") {
+      headers = this.client.toHeader(
+        this.client.authorize(requestData, this.token)
+      );
+    } else {
+      headers = {
+        Authorization: `Bearer ${this.config.bearer_token}`
+      };
+    }
 
     const results = await Fetch(requestData.url, {
       method: "POST",
