@@ -28,20 +28,20 @@ Twitter has two different authentication options:
 - App: higher rate limits. Great for building your own Twitter App
 - User: lower rate limits. Great for making requests on behalf of a User.
 
-User authentication requires:
+**User** authentication requires:
 - `consumer_key`
 - `consumer_secret`
 - `access_token_key`
 - `access_token_secret`
 
-App authentication requires:
+**App** authentication requires:
 - `bearer_token`
 
 App authentication is a simple header behind the scenes:
 
-```
+```es6
 headers: {
-  Authorization: `bearer ${bearer_token}`
+  Authorization: `Bearer ${bearer_token}`
 }
 ```
 
