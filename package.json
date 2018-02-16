@@ -1,0 +1,38 @@
+{
+  "name": "twitter-lite",
+  "version": "0.1.0",
+  "description": "A tiny, full-featured client / server library for the Twitter API",
+  "source": "twitter.js",
+  "main": "dist/twitter.js",
+  "module": "dist/twitter.m.js",
+  "repository": "preposterous/twitter-lite",
+  "homepage": "https://github.com/preposterous/twitter-lite",
+  "author": "Peter Piekarczyk <peter@peterp.me>",
+  "license": "MIT",
+  "files": [
+    "twitter.js",
+    "dist"
+  ],
+  "keywords": [
+    "twitter",
+    "node-twitter",
+    "twitter oauth",
+    "twitter rest",
+    "rest",
+    "api",
+    "twitter api"
+  ],
+  "dependencies": {
+    "node-fetch": "^2.0.0",
+    "oauth-1.0a": "^2.2.4",
+    "sub-in": "^1.0.2"
+  },
+  "devDependencies": {
+    "jest": "^22.3.0",
+    "microbundle": "^0.4.3"
+  },
+  "scripts": {
+    "prepare": "microbundle",
+    "test": "jest"
+  }
+}
