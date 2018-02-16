@@ -33,6 +33,7 @@
   },
   "scripts": {
     "prepare": "microbundle",
-    "test": "jest"
+    "test": "jest",
+    "release": "npm run -s prepare && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
   }
 }
