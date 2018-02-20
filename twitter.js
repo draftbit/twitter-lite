@@ -51,9 +51,9 @@ class Twitter {
     this.config = config;
   }
 
-  async get(resource) {
+  async get(resource, parameters) {
     const requestData = {
-      url: `${this.url}/${resource}.json?${querystring.stringify(parameters)}`,
+      url: `${this.url}/${resource}.json`,
       method: "GET"
     };
     if (parameters)
