@@ -1,9 +1,8 @@
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
-const SubIn = require("sub-in");
 const Fetch = require("cross-fetch");
 
-const getUrl = subdomain => SubIn("https://$0.twitter.com/1.1", [subdomain]);
+const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
 const createOauthClient = ({ key, secret }) => {
   const client = OAuth({
     consumer: { key, secret },
