@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const Fetch = require("cross-fetch");
+const querystring = require("querystring");
 
 const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
 const createOauthClient = ({ key, secret }) => {
@@ -52,9 +53,11 @@ class Twitter {
 
   async get(resource) {
     const requestData = {
-      url: `${this.url}/${resource}.json`,
+      url: `${this.url}/${resource}.json?${querystring.stringify(parameters)}`,
       method: "GET"
     };
+    if (parameters)
+      requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
