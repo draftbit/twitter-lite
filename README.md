@@ -76,9 +76,32 @@ client.get("users/lookup")
 
 ## Streams
 
-TBD
+To learn more about the streaming API visit the [Twitter Docs](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter.html).
 
-I don't know shit about streams. If you can help make this work with streams, I would appreciate & encourage it!
+```es6
+const client = new Twitter({
+  consumer_key: "xyz" // from Twitter.
+  consumer_secret: "xyz" // from Twitter.
+  access_token_key: "abc" // from your User (oauth_token)
+  access_token_secret: "abc" // from your User (oauth_token_secret)
+});
+
+const parameters = {
+  track: "#bitcoin,#litecoin,#monero", // #bitcoin, #litecoin, #monero
+  follow: "422297024,873788249839370240", // @OrchardAI, @tylerbuchea
+  locations: "-122.75,36.8,-121.75,37.8", // Bounding box -	San Francisco
+};
+
+client.stream("statuses/filter", parameters)
+  .on("start", response => console.log("start"))
+  .on("data", data => console.log("data", data.text))
+  .on("ping", () => console.log("ping"))
+  .on("error", error => console.log("error", error))
+  .on("end", response => console.log("end"));
+
+// to stop the stream:
+client.stream.destroy(); // emits "end" and "error" event
+```
 
 ## Troubleshooting
 
