@@ -2,7 +2,10 @@
   "name": "twitter-lite",
   "version": "0.2.1",
   "description": "A tiny, full-featured client / server library for the Twitter API",
-  "source": "twitter.js",
+  "source": [
+    "twitter.js",
+    "stream.js"
+  ],
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
   "repository": "preposterous/twitter-lite",
@@ -11,6 +14,7 @@
   "license": "MIT",
   "files": [
     "twitter.js",
+    "stream.js",
     "dist"
   ],
   "keywords": [

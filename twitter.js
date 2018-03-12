@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const Fetch = require("cross-fetch");
 const querystring = require("querystring");
+const Stream = require("./stream");
 
 const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
 const createOauthClient = ({ key, secret }) => {
@@ -99,6 +100,43 @@ class Twitter {
       body: JSON.stringify(body)
     }).then(res => res.json());
     return results;
+  }
+
+  stream(resource, parameters) {
+    if (this.authType !== "User")
+      throw Error("Streams require user context authentication");
+
+    const stream = new Stream();
+
+    const requestData = {
+      url: `${getUrl("stream")}/${resource}.json`,
+      method: "GET",
+    };
+    if (parameters)
+      requestData.url += "?" + querystring.stringify(parameters);
+
+    const headers = this.client.toHeader(
+      this.client.authorize(requestData, this.token)
+    );
+
+    const request = Fetch(requestData.url, { headers });
+
+    request
+      .then(response => {
+        this.stream.destroy = () => response.body.destroy();
+
+        response.status === 200
+          ? stream.emit("start", response)
+          : stream.emit("error", Error(`Status Code: ${response.status}`));
+
+        response.body
+          .on("data", chunk => stream.parse(chunk))
+          .on("error", error => stream.emit("error", error))
+          .on("end", () => stream.emit("end", response));
+      })
+      .catch(error => stream.emit("error", error));
+
+    return stream;
   }
 }
 
