@@ -50,9 +50,9 @@ headers: {
 ```es6
 const client = new Twitter({
   subdomain: "api",
-  consumer_key: "xyz" // from Twitter.
-  consumer_secret: "xyz" // from Twitter.
-  access_token_key: "abc" // from your User (oauth_token)
+  consumer_key: "xyz", // from Twitter.
+  consumer_secret: "xyz", // from Twitter.
+  access_token_key: "abc", // from your User (oauth_token)
   access_token_secret: "abc" // from your User (oauth_token_secret)
 })
 
