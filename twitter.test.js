@@ -1,4 +1,3 @@
-require('dotenv').config()
 const Twitter = require('./twitter')
 
 const {
@@ -60,10 +59,7 @@ it('should verify credentials with correct tokens', async () => {
     access_token_secret: ACCESS_TOKEN_SECRET
   })
 
-  console.log('secret', ACCESS_TOKEN_SECRET)
-
   const response = await client.get('account/verify_credentials')
-  console.log('response', response)
   const results = {
     created_at: response.created_at,
     name: response.name,
