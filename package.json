@@ -32,6 +32,7 @@
     "oauth-1.0a": "^2.2.4"
   },
   "devDependencies": {
+    "flow-bin": "^0.67.1",
     "jest": "^22.3.0",
     "microbundle": "^0.4.3"
   },

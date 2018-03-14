@@ -1,7 +1,9 @@
+// @flow
+
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const Fetch = require("cross-fetch");
-const querystring = require("querystring");
+const qs = require("querystring");
 const Stream = require("./stream");
 
 const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
@@ -20,7 +22,16 @@ const createOauthClient = ({ key, secret }) => {
   return client;
 };
 
-const defaults = {
+type Defaults = {
+  subdomain: "api" | "stream" | "userstream" | "sitestream" | "upload",
+  consumer_key: ?string,
+  consumer_secret: ?string,
+  access_token_key: ?string,
+  access_token_secret: ?string,
+  bearer_token: ?string
+};
+
+const defaults: Defaults = {
   subdomain: "api",
   consumer_key: null,
   consumer_secret: null,
@@ -34,30 +45,62 @@ const baseHeaders = {
   Accept: "application/json"
 };
 
-class Twitter {
+class Twitter<Defaults> {
   constructor(options) {
-    const config = Object.assign({}, defaults, options);
-    this.authType = config.bearer_token ? "App" : "User";
+
+    this.config = Object.assign({}, defaults, options);
+
+    this.authType = this.config.bearer_token ? "App" : "User";
+
     this.client = createOauthClient({
-      key: config.consumer_key,
-      secret: config.consumer_secret
+      key: this.config.consumer_key,
+      secret: this.config.consumer_secret
     });
 
     this.token = {
-      key: config.access_token_key,
-      secret: config.access_token_secret
+      key: this.config.access_token_key,
+      secret: this.config.access_token_secret
     };
 
-    this.url = getUrl(config.subdomain);
-    this.config = config;
+    this.url = getUrl(this.config.subdomain);
+  }
+
+  async get({ resource, params }) {
+    return this.makeRequest({ method: 'GET', resource, params })
+  }
+
+  async post ({ resource, params, body }) {
+    return this.makeRequest({ method: 'POST', resource, params, body })
+  }
+
+  async makeRequest({ method, resource, params, body }){
+    let url = `${this.url}/${resource}.json`,
+    const request = {
+      method,
+      headers: {}
+    }
+
+    if (body) request.body = JSON.stringify(body)
+    if (params) url += `?${qs.stringify(params)}`
+
+    const response = await Fetch(url, request)
+    const results = await response.json()
+
+    return {
+      response,
+      results
+    }
   }
 
   async get(resource, parameters) {
+    let url = `${this.url}/${resource}.json`,
     const requestData = {
-      url: `${this.url}/${resource}.json`,
-      method: "GET"
+      method: "GET",
+      headers: {
+      }
     };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+
+    if (parameters) url += "?" + qs.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
@@ -82,7 +125,7 @@ class Twitter {
       method: "POST"
     };
 
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.url += "?" + qs.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
@@ -113,7 +156,7 @@ class Twitter {
       url: `${getUrl("stream")}/${resource}.json`,
       method: "GET"
     };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.url += "?" + qs.stringify(parameters);
 
     const headers = this.client.toHeader(
       this.client.authorize(requestData, this.token)
