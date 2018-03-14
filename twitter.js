@@ -57,8 +57,7 @@ class Twitter {
       url: `${this.url}/${resource}.json`,
       method: "GET"
     };
-    if (parameters)
-      requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
@@ -77,11 +76,13 @@ class Twitter {
     return results;
   }
 
-  async post(resource, body) {
+  async post(resource, body, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
       method: "POST"
     };
+
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
@@ -110,10 +111,9 @@ class Twitter {
 
     const requestData = {
       url: `${getUrl("stream")}/${resource}.json`,
-      method: "GET",
+      method: "GET"
     };
-    if (parameters)
-      requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     const headers = this.client.toHeader(
       this.client.authorize(requestData, this.token)
