@@ -1,10 +1,11 @@
+require('dotenv').config()
 const Twitter = require('./twitter')
 
 const {
   TWITTER_CONSUMER_KEY,
   TWITTER_CONSUMER_SECRET,
-  TWITTER_TOKEN,
-  TWITTER_TOKEN_SECRET
+  ACCESS_TOKEN,
+  ACCESS_TOKEN_SECRET
 } = process.env
 
 it('should default export to be a function', () => {
@@ -25,7 +26,7 @@ it('should fail on invalid access_token_secret', async () => {
     subdomain: 'api',
     consumer_key: TWITTER_CONSUMER_KEY,
     consumer_secret: TWITTER_CONSUMER_SECRET,
-    access_token_key: TWITTER_TOKEN,
+    access_token_key: ACCESS_TOKEN,
     access_token_secret: 'xyz'
   })
 
@@ -55,22 +56,27 @@ it('should verify credentials with correct tokens', async () => {
     subdomain: 'api',
     consumer_key: TWITTER_CONSUMER_KEY,
     consumer_secret: TWITTER_CONSUMER_SECRET,
-    access_token_key: TWITTER_TOKEN,
-    access_token_secret: TWITTER_TOKEN_SECRET
+    access_token_key: ACCESS_TOKEN,
+    access_token_secret: ACCESS_TOKEN_SECRET
   })
 
+  console.log('secret', ACCESS_TOKEN_SECRET)
+
   const response = await client.get('account/verify_credentials')
+  console.log('response', response)
   const results = {
     created_at: response.created_at,
     name: response.name,
     lang: response.lang,
-    screen_name: response.screen_name
+    screen_name: response.screen_name,
+    description: response.description
   }
 
   expect(results).toEqual({
-    created_at: 'Sat Mar 21 18:52:03 +0000 2009',
-    name: "Nodejs Testing Account",
-    lang: "en",
-    screen_name: "nodejs_lite"
+    created_at: 'Wed Mar 14 21:17:37 +0000 2018',
+    name: 'Nodejs Testing Account',
+    lang: 'en',
+    screen_name: 'nodejs_lite',
+    description: 'Twitter Lite Testing Account'
   })
 })
