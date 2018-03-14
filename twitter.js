@@ -26,7 +26,8 @@ const defaults = {
   consumer_secret: null,
   access_token_key: null,
   access_token_secret: null,
-  bearer_token: null
+  bearer_token: null,
+  language: null
 };
 
 const baseHeaders = {
@@ -57,7 +58,14 @@ class Twitter {
       url: `${this.url}/${resource}.json`,
       method: "GET"
     };
+
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (this.config.language) {
+      parameters = {
+        ...parameters,
+        language
+      };
+    }
 
     let headers = {};
     if (this.authType === "User") {
@@ -83,6 +91,12 @@ class Twitter {
     };
 
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (this.config.language) {
+      parameters = {
+        ...parameters,
+        language
+      };
+    }
 
     let headers = {};
     if (this.authType === "User") {
