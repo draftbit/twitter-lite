@@ -59,15 +59,15 @@ it('should verify credentials with correct tokens', async () => {
     access_token_secret: TWITTER_TOKEN_SECRET
   })
 
-  const results = await client.get('account/verify_credentials')
-  const user = {
-    created_at: results.created_at,
-    name: results.name,
-    lang: results.lang,
-    screen_name: results.screen_name
+  const response = await client.get('account/verify_credentials')
+  const results = {
+    created_at: response.created_at,
+    name: response.name,
+    lang: response.lang,
+    screen_name: response.screen_name
   }
 
-  expect(user).toEqual({
+  expect(results).toEqual({
     created_at: 'Sat Mar 21 18:52:03 +0000 2009',
     name: "Nodejs Testing Account",
     lang: "en",
