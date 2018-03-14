@@ -71,10 +71,13 @@ class Twitter {
       };
     }
 
-    const results = await Fetch(requestData.url, { headers }).then(res =>
-      res.json()
-    );
-    return results;
+    const response = await Fetch(requestData.url, { headers });
+    const results = await response.json();
+
+    return {
+      response,
+      results
+    };
   }
 
   async post(resource, body) {
@@ -94,12 +97,17 @@ class Twitter {
       };
     }
 
-    const results = await Fetch(requestData.url, {
+    const response = await Fetch(requestData.url, {
       method: "POST",
       headers: Object.assign({}, baseHeaders, headers),
       body: JSON.stringify(body)
     }).then(res => res.json());
-    return results;
+
+    const results = await response.json();
+    return {
+      results,
+      response
+    };
   }
 
   stream(resource, parameters) {
