@@ -1,18 +1,22 @@
-# Twitter Lite [![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/Preposterous/twitter-lite.svg?branch=master)](https://travis-ci.org/Preposterous/twitter-lite)
+# Twitter Lite
 
-A tiny (591B), fully-featured, client & server library for the Twitter API
+A tiny Nodejs library for the Twitter API
 
-- Promise-first via Async / Await
-- Up-to-date
+[![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/Preposterous/twitter-lite.svg?branch=master)](https://travis-ci.org/Preposterous/twitter-lite)
+
+## Features
+- Promise driven via Async / Await
+- Up-to-date APIs
+- Stream support
 - Under 1kb
 
 ## Installation
 
-```
+```zsh
 yarn add twitter-lite
 ```
 
-```
+```zsh
 npm install twitter-lite
 ```
 
