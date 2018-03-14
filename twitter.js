@@ -5,6 +5,8 @@ const querystring = require("querystring");
 const Stream = require("./stream");
 
 const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
+const getOauth = subdomain => `https://${subdomain}.twitter.com/oauth`;
+
 const createOauthClient = ({ key, secret }) => {
   const client = OAuth({
     consumer: { key, secret },
@@ -34,6 +36,17 @@ const baseHeaders = {
   Accept: "application/json"
 };
 
+function formatRes(txt){
+  var ts = txt.split("&");
+  var obj = {};
+  for(var i=0; i<ts.length; i++){
+    var ts2 = ts[i].split("=");
+    obj[ts2[0]] = ts2[1];
+  }
+
+  return obj;
+}
+
 class Twitter {
   constructor(options) {
     const config = Object.assign({}, defaults, options);
@@ -49,9 +62,68 @@ class Twitter {
     };
 
     this.url = getUrl(config.subdomain);
+    this.oauth = getOauth(config.subdomain);
     this.config = config;
   }
+  
+  async reqTkn(callback) {
+    // return `oauth_token` & `oauth_token_secret`
+    // https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token
+    
+    const requestData = {
+      url: `${this.oauth}/request_token`,
+      method: "POST"
+    };
+    
+    var parameters = {};
+    if(callback) parameters = { "oauth_callback": callback };
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
+    let headers = {};
+    headers = this.client.toHeader(
+      this.client.authorize(requestData, {})
+    );
+
+    const results = await Fetch(requestData.url, {
+      method: "POST",
+      headers: Object.assign({}, baseHeaders, headers)
+    })
+    .then(res => res.text())
+    .then(txt => formatRes(txt));
+    
+    return results;
+  }
+  
+  async accTkn(key, secret, verifier) {
+    // return `accTkn_key` & `accTkn_secret`
+    // https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token
+    
+    const requestData = {
+      url: `${this.oauth}/access_token`,
+      method: "POST"
+    };
+    
+    var parameters = { "oauth_verifier": verifier };
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+
+    let headers = {};
+    headers = this.client.toHeader(
+      this.client.authorize(requestData, {
+        key: key,
+        secret: secret
+      })
+    );
+
+    const results = await Fetch(requestData.url, {
+      method: "POST",
+      headers: Object.assign({}, baseHeaders, headers)
+    })
+    .then(res => res.text())
+    .then(txt => formatRes(txt));
+    
+    return results;
+  }
+  
   async get(resource, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
@@ -75,7 +147,7 @@ class Twitter {
     );
     return results;
   }
-
+  
   async post(resource, body, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
@@ -141,3 +213,4 @@ class Twitter {
 }
 
 module.exports = Twitter;
+
