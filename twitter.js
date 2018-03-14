@@ -77,11 +77,15 @@ class Twitter {
     return results;
   }
 
-  async post(resource, body) {
+  async post(resource, body, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
       method: "POST"
     };
+
+    if (parameters) {
+      requestData.url += "?" + querystring.stringify(parameters);
+    }
 
     let headers = {};
     if (this.authType === "User") {
