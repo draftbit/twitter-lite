@@ -4,8 +4,7 @@ const Fetch = require("cross-fetch");
 const querystring = require("querystring");
 const Stream = require("./stream");
 
-const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
-const getOauth = subdomain => `https://${subdomain}.twitter.com/oauth`;
+const getUrl = (subdomain, endpoint='1.1') => `https://${subdomain}.twitter.com/${endpoint}`;
 
 const createOauthClient = ({ key, secret }) => {
   const client = OAuth({
@@ -36,7 +35,7 @@ const baseHeaders = {
   Accept: "application/json"
 };
 
-function formatRes(txt){
+function formatOauthRes(txt){
   var ts = txt.split("&");
   var obj = {};
   for(var i=0; i<ts.length; i++){
@@ -62,11 +61,11 @@ class Twitter {
     };
 
     this.url = getUrl(config.subdomain);
-    this.oauth = getOauth(config.subdomain);
+    this.oauth = getUrl(config.subdomain, "oauth");
     this.config = config;
   }
   
-  async reqTkn(callback) {
+  async getRequestToken(twitterCallbackUrl) {
     // return `oauth_token` & `oauth_token_secret`
     // https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token
     
@@ -76,25 +75,26 @@ class Twitter {
     };
     
     var parameters = {};
-    if(callback) parameters = { "oauth_callback": callback };
+    if(twitterCallbackUrl) parameters = { "oauth_callback": twitterCallbackUrl };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     headers = this.client.toHeader(
       this.client.authorize(requestData, {})
     );
-
+    
     const results = await Fetch(requestData.url, {
       method: "POST",
       headers: Object.assign({}, baseHeaders, headers)
     })
     .then(res => res.text())
-    .then(txt => formatRes(txt));
+    .then(txt => formatOauthRes(txt));
     
     return results;
   }
   
-  async accTkn(key, secret, verifier) {
+  async getAccessToken(options) {
+    // { key:reqTkn, secret:reqTknSecret, verifier:oauthVerifier }
     // return `accTkn_key` & `accTkn_secret`
     // https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token
     
@@ -103,14 +103,14 @@ class Twitter {
       method: "POST"
     };
     
-    var parameters = { "oauth_verifier": verifier };
+    var parameters = { "oauth_verifier": options.verifier };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     headers = this.client.toHeader(
       this.client.authorize(requestData, {
-        key: key,
-        secret: secret
+        key: options.key,
+        secret: options.secret
       })
     );
 
@@ -119,7 +119,7 @@ class Twitter {
       headers: Object.assign({}, baseHeaders, headers)
     })
     .then(res => res.text())
-    .then(txt => formatRes(txt));
+    .then(txt => formatOauthRes(txt));
     
     return results;
   }

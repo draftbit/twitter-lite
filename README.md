@@ -52,26 +52,30 @@ headers: {
 ### Oauth Authentication
 According to the [docs](https://developer.twitter.com/en/docs/basics/authentication/api-reference/authenticate) this helps you get access token from your users.
 
-```
-var t = new Twitter({
+```es6
+const client = new Twitter({
   consumer_key: "xyz",
   consumer_secret: "xyz"
 });
 
-t.reqTkn("http://callbackurl.com")
+client.getRequestToken("http://callbackurl.com")
 .then(res => console.log(res))
 .catch(console.error);
 ```
 
 Then you redirect your user to `https://api.twitter.com/oauth/authenticate?oauth_token=xyz123abc`, and once you get the verifier and the token, you pass them on to the next stage of the authentication.
 
-```
-var t = new Twitter({
+```es6
+const client = new Twitter({
   consumer_key: "xyz",
   consumer_secret: "xyz"
 });
 
-t.accTkn(key, secret, verfier)
+client.getAccessToken({
+    key: requestToken,
+    secret: requestTokenSecret,
+    verifier: oauthVerifier
+})
 .then(res=>console.log(res))
 .catch(console.error);
 ```
