@@ -1,3 +1,5 @@
+// @flow
+
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const Fetch = require("cross-fetch");
@@ -18,6 +20,15 @@ const createOauthClient = ({ key, secret }) => {
   });
 
   return client;
+};
+
+type Defaults = {
+  subdomain: "api" | "stream" | "userstream" | "sitestream" | "upload",
+  consumer_key: ?string,
+  consumer_secret: ?string,
+  access_token_key: ?string,
+  access_token_secret: ?string,
+  bearer_token: ?string
 };
 
 const defaults = {
