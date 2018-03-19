@@ -52,7 +52,7 @@ class Twitter {
     this.config = config;
   }
 
-  async get(resource, parameters) {
+  async get({ resource, params }) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
       method: "GET"
@@ -76,7 +76,7 @@ class Twitter {
     return results;
   }
 
-  async post(resource, body, parameters) {
+  async post({ resource, body, params }) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
       method: "POST"
@@ -103,7 +103,7 @@ class Twitter {
     return results;
   }
 
-  stream(resource, parameters) {
+  stream({ resource, params, body }) {
     if (this.authType !== "User")
       throw Error("Streams require user context authentication");
 
