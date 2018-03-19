@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const Fetch = require("cross-fetch");
-const querystring = require("querystring");
+const qs = require("querystring");
 const Stream = require("./stream");
 
 const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
@@ -52,58 +52,50 @@ class Twitter {
     this.config = config;
   }
 
-  async get({ resource, params }) {
-    const requestData = {
-      url: `${this.url}/${resource}.json`,
-      method: "GET"
-    };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+  async get(resource, options = {}) {
+    const { params } = options;
+    return this.makeRequest({ method: "GET", resource, params });
+  }
 
-    let headers = {};
+  async post(resource, options = {}) {
+    const { body, params } = options;
+    return this.makeRequest({ method: "POST", resource, body, params });
+  }
+
+  getHeaders(requestData) {
     if (this.authType === "User") {
-      headers = this.client.toHeader(
+      const headers = this.client.toHeader(
         this.client.authorize(requestData, this.token)
       );
+      return headers;
     } else {
-      headers = {
+      return {
         Authorization: `Bearer ${this.config.bearer_token}`
       };
     }
-
-    const results = await Fetch(requestData.url, { headers }).then(res =>
-      res.json()
-    );
-    return results;
   }
 
-  async post({ resource, body, params }) {
+  async makeRequest({ method, resource, params, body }) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
-      method: "POST"
+      method
     };
 
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    const headers = this.getHeaders(requestData);
+    requestData.headers = headers;
 
-    let headers = {};
-    if (this.authType === "User") {
-      headers = this.client.toHeader(
-        this.client.authorize(requestData, this.token)
-      );
-    } else {
-      headers = {
-        Authorization: `Bearer ${this.config.bearer_token}`
-      };
-    }
+    if (params) requestData.url += `?${qs.stringify(params)}`;
 
-    const results = await Fetch(requestData.url, {
-      method: "POST",
-      headers: Object.assign({}, baseHeaders, headers),
-      body: JSON.stringify(body)
-    }).then(res => res.json());
-    return results;
+    const response = await Fetch(requestData.url, requestData);
+    const results = await response.json();
+
+    return {
+      response,
+      results
+    };
   }
 
-  stream({ resource, params, body }) {
+  stream(resource, { params, body }) {
     if (this.authType !== "User")
       throw Error("Streams require user context authentication");
 
