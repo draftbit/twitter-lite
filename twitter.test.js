@@ -30,7 +30,7 @@ it("should fail on invalid access_token_secret", async () => {
     access_token_secret: "xyz"
   });
 
-  const results = await client.get("account/verify_credentials");
+  const { results } = await client.get("account/verify_credentials");
   expect(results).toEqual({
     errors: [{ code: 32, message: "Could not authenticate you." }]
   });
@@ -45,7 +45,7 @@ it("should fail on invalid or expired token", async () => {
     access_token_secret: "xyz"
   });
 
-  const results = await client.get("account/verify_credentials");
+  const { results } = await client.get("account/verify_credentials");
   expect(results).toEqual({
     errors: [{ code: 89, message: "Invalid or expired token." }]
   });
@@ -60,7 +60,7 @@ it("should verify credentials with correct tokens", async () => {
     access_token_secret: ACCESS_TOKEN_SECRET
   });
 
-  const response = await client.get("account/verify_credentials");
+  const { results: response } = await client.get("account/verify_credentials");
   const results = {
     created_at: response.created_at,
     name: response.name,
@@ -87,7 +87,7 @@ it("should show 2 favorited tweets", async () => {
     access_token_secret: ACCESS_TOKEN_SECRET
   });
 
-  const response = await client.get("favorites/list");
+  const { results: response } = await client.get("favorites/list");
   const [first, second] = response;
 
   const results = [
