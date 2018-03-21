@@ -35,17 +35,6 @@ const baseHeaders = {
   Accept: "application/json"
 };
 
-function formatOauthRes(txt){
-  var ts = txt.split("&");
-  var obj = {};
-  for(var i=0; i<ts.length; i++){
-    var ts2 = ts[i].split("=");
-    obj[ts2[0]] = ts2[1];
-  }
-
-  return obj;
-}
-
 class Twitter {
   constructor(options) {
     const config = Object.assign({}, defaults, options);
@@ -65,10 +54,7 @@ class Twitter {
     this.config = config;
   }
   
-  async getRequestToken(twitterCallbackUrl) {
-    // return `oauth_token` & `oauth_token_secret`
-    // https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token
-    
+  async getRequestToken(twitterCallbackUrl) { 
     const requestData = {
       url: `${this.oauth}/request_token`,
       method: "POST"
@@ -88,16 +74,12 @@ class Twitter {
       headers: Object.assign({}, baseHeaders, headers)
     })
     .then(res => res.text())
-    .then(txt => formatOauthRes(txt));
+    .then(txt => querystring.parse(txt));
     
     return results;
   }
   
-  async getAccessToken(options) {
-    // { key:reqTkn, secret:reqTknSecret, verifier:oauthVerifier }
-    // return `accTkn_key` & `accTkn_secret`
-    // https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token
-    
+  async getAccessToken(options) { 
     const requestData = {
       url: `${this.oauth}/access_token`,
       method: "POST"
@@ -119,7 +101,7 @@ class Twitter {
       headers: Object.assign({}, baseHeaders, headers)
     })
     .then(res => res.text())
-    .then(txt => formatOauthRes(txt));
+    .then(txt => querystring.parse(txt));
     
     return results;
   }
