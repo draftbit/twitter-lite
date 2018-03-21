@@ -4,7 +4,8 @@ const Fetch = require("cross-fetch");
 const querystring = require("querystring");
 const Stream = require("./stream");
 
-const getUrl = subdomain => `https://${subdomain}.twitter.com/1.1`;
+const getUrl = (subdomain, endpoint='1.1') => `https://${subdomain}.twitter.com/${endpoint}`;
+
 const createOauthClient = ({ key, secret }) => {
   const client = OAuth({
     consumer: { key, secret },
@@ -49,9 +50,62 @@ class Twitter {
     };
 
     this.url = getUrl(config.subdomain);
+    this.oauth = getUrl(config.subdomain, "oauth");
     this.config = config;
   }
+  
+  async getRequestToken(twitterCallbackUrl) { 
+    const requestData = {
+      url: `${this.oauth}/request_token`,
+      method: "POST"
+    };
+    
+    var parameters = {};
+    if(twitterCallbackUrl) parameters = { "oauth_callback": twitterCallbackUrl };
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
+    let headers = {};
+    headers = this.client.toHeader(
+      this.client.authorize(requestData, {})
+    );
+    
+    const results = await Fetch(requestData.url, {
+      method: "POST",
+      headers: Object.assign({}, baseHeaders, headers)
+    })
+    .then(res => res.text())
+    .then(txt => querystring.parse(txt));
+    
+    return results;
+  }
+  
+  async getAccessToken(options) { 
+    const requestData = {
+      url: `${this.oauth}/access_token`,
+      method: "POST"
+    };
+    
+    var parameters = { "oauth_verifier": options.verifier };
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+
+    let headers = {};
+    headers = this.client.toHeader(
+      this.client.authorize(requestData, {
+        key: options.key,
+        secret: options.secret
+      })
+    );
+
+    const results = await Fetch(requestData.url, {
+      method: "POST",
+      headers: Object.assign({}, baseHeaders, headers)
+    })
+    .then(res => res.text())
+    .then(txt => querystring.parse(txt));
+    
+    return results;
+  }
+  
   async get(resource, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
@@ -75,7 +129,7 @@ class Twitter {
     );
     return results;
   }
-
+  
   async post(resource, body, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
@@ -141,3 +195,4 @@ class Twitter {
 }
 
 module.exports = Twitter;
+

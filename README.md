@@ -53,6 +53,50 @@ headers: {
 }
 ```
 
+### Oauth Authentication
+According to the [docs](https://developer.twitter.com/en/docs/basics/authentication/api-reference/authenticate) this helps you get access token from your users.
+
+- [Request Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token)
+- [Access Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token)
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz"
+});
+
+client.getRequestToken("http://callbackurl.com")
+.then(res => console.log({
+    reqTkn: res.oauth_token, 
+    reqTknSecret: res.oauth_token_secret
+}))
+.catch(console.error);
+```
+
+Then you redirect your user to `https://api.twitter.com/oauth/authenticate?oauth_token=xyz123abc`, and once you get the verifier and the token, you pass them on to the next stage of the authentication.
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz"
+});
+
+client.getAccessToken({
+    key: requestToken,
+    secret: requestTokenSecret,
+    verifier: oauthVerifier
+})
+.then(res=>console.log({
+    accTkn: res.oauth_token, 
+    accTknSecret: res.oauth_token_secret,
+    userId: res.user_id,
+    screenName: res.screen_name
+}))
+.catch(console.error);
+```
+
+And this will return you your `access_token` and `access_token_secret`.
+
 ### Verifying Credentials Example (User auth)
 
 ```es6
