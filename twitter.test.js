@@ -8,6 +8,16 @@ const {
   ACCESS_TOKEN_SECRET
 } = process.env;
 
+function newClient(subdomain = "api") {
+  return new Twitter({
+    subdomain,
+    consumer_key: TWITTER_CONSUMER_KEY,
+    consumer_secret: TWITTER_CONSUMER_SECRET,
+    access_token_key: ACCESS_TOKEN,
+    access_token_secret: ACCESS_TOKEN_SECRET
+  });
+}
+
 it("should default export to be a function", () => {
   expect(new Twitter()).toBeInstanceOf(Twitter);
 });
@@ -52,13 +62,7 @@ it("should fail on invalid or expired token", async () => {
 });
 
 it("should verify credentials with correct tokens", async () => {
-  const client = new Twitter({
-    subdomain: "api",
-    consumer_key: TWITTER_CONSUMER_KEY,
-    consumer_secret: TWITTER_CONSUMER_SECRET,
-    access_token_key: ACCESS_TOKEN,
-    access_token_secret: ACCESS_TOKEN_SECRET
-  });
+  const client = newClient();
 
   const response = await client.get("account/verify_credentials");
   const results = {
@@ -79,13 +83,7 @@ it("should verify credentials with correct tokens", async () => {
 });
 
 it("should show 2 favorited tweets", async () => {
-  const client = new Twitter({
-    subdomain: "api",
-    consumer_key: TWITTER_CONSUMER_KEY,
-    consumer_secret: TWITTER_CONSUMER_SECRET,
-    access_token_key: ACCESS_TOKEN,
-    access_token_secret: ACCESS_TOKEN_SECRET
-  });
+  const client = newClient();
 
   const response = await client.get("favorites/list");
   const [first, second] = response;
@@ -107,4 +105,42 @@ it("should show 2 favorited tweets", async () => {
       id: 972868365898334200
     }
   ]);
+});
+
+it("should fail to follow unspecified user", async () => {
+  const client = newClient();
+
+  const response = await client.post("friendships/create");
+  expect(response).toEqual({
+    errors: [
+      {
+        code: 108,
+        message: "Cannot find specified user."
+      }
+    ]
+  });
+});
+
+it("should follow user", async () => {
+  const client = newClient();
+
+  // This is counter-intuitive - see https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433
+  const response = await client.post("friendships/create", null, {
+    screen_name: "dandv"
+  });
+  expect(response).toMatchObject({
+    name: "Dan Dascalescu"
+  });
+});
+
+it("should unfollow user", async () => {
+  const client = newClient();
+
+  // This is counter-intuitive - see above
+  const response = await client.post("friendships/destroy", null, {
+    user_id: "15008676"
+  });
+  expect(response).toMatchObject({
+    name: "Dan Dascalescu"
+  });
 });

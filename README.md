@@ -54,10 +54,11 @@ headers: {
 ```
 
 ### Oauth Authentication
+
 According to the [docs](https://developer.twitter.com/en/docs/basics/authentication/api-reference/authenticate) this helps you get access token from your users.
 
-- [Request Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token)
-- [Access Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token)
+* [Request Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token)
+* [Access Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token)
 
 ```es6
 const client = new Twitter({
@@ -65,12 +66,15 @@ const client = new Twitter({
   consumer_secret: "xyz"
 });
 
-client.getRequestToken("http://callbackurl.com")
-.then(res => console.log({
-    reqTkn: res.oauth_token, 
-    reqTknSecret: res.oauth_token_secret
-}))
-.catch(console.error);
+client
+  .getRequestToken("http://callbackurl.com")
+  .then(res =>
+    console.log({
+      reqTkn: res.oauth_token,
+      reqTknSecret: res.oauth_token_secret
+    })
+  )
+  .catch(console.error);
 ```
 
 Then you redirect your user to `https://api.twitter.com/oauth/authenticate?oauth_token=xyz123abc`, and once you get the verifier and the token, you pass them on to the next stage of the authentication.
@@ -81,18 +85,21 @@ const client = new Twitter({
   consumer_secret: "xyz"
 });
 
-client.getAccessToken({
+client
+  .getAccessToken({
     key: requestToken,
     secret: requestTokenSecret,
     verifier: oauthVerifier
-})
-.then(res=>console.log({
-    accTkn: res.oauth_token, 
-    accTknSecret: res.oauth_token_secret,
-    userId: res.user_id,
-    screenName: res.screen_name
-}))
-.catch(console.error);
+  })
+  .then(res =>
+    console.log({
+      accTkn: res.oauth_token,
+      accTknSecret: res.oauth_token_secret,
+      userId: res.user_id,
+      screenName: res.screen_name
+    })
+  )
+  .catch(console.error);
 ```
 
 And this will return you your `access_token` and `access_token_secret`.
@@ -131,6 +138,25 @@ client
   })
   .catch(console.error);
 ```
+
+## POST methods
+
+Use the `.post` method for actions that change state, as documented in the Twitter API. For [example](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create.html), to follow a user:
+
+```js
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz",
+  access_token_key: "abc",
+  access_token_secret: "abc"
+});
+
+await client.post("friendships/create", null, {
+  screen_name: 'dandv'
+});
+```
+
+Note: [for now](https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433), make sure to pass a `null` body to `.post`. This is subject to change in a future version of the library.
 
 ## Streams
 
