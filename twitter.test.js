@@ -144,3 +144,26 @@ it("should unfollow user", async () => {
     name: "Dan Dascalescu"
   });
 });
+
+it("should DM user", async () => {
+  const client = newClient();
+
+  const response = await client.post("direct_messages/events/new", null, {
+    event: {
+      type: "message_create",
+      message_create: {
+        target: {
+          recipient_id: "15008676"
+        },
+        message_data: {
+          text: "Hello World!"
+        }
+      }
+    }
+  });
+  expect(response).toMatchObject({
+    event: {
+      type: "message_create"
+    }
+  });
+});
