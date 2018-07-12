@@ -148,7 +148,8 @@ it("should unfollow user", async () => {
 it("should DM user", async () => {
   const client = newClient();
 
-  const response = await client.post("direct_messages/events/new", null, {
+  // POST with body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/guides/direct-message-migration.html
+  const response = await client.post("direct_messages/events/new", {
     event: {
       type: "message_create",
       message_create: {

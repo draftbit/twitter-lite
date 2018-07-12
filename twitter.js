@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const OAuth = require("oauth-1.0a");
 const Fetch = require("cross-fetch");
-const qs = require("qs");
+const qs = require("querystring");
 const Stream = require("./stream");
 
 const getUrl = (subdomain, endpoint = "1.1") =>
@@ -135,7 +135,7 @@ class Twitter {
       method: "POST"
     };
 
-    if (parameters) requestData.url += "?" + qs.stringify(parameters);
+    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
