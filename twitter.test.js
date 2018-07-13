@@ -147,6 +147,9 @@ it("should unfollow user", async () => {
 
 it("should DM user", async () => {
   const client = newClient();
+  const randomString = Math.random()
+    .toString(36)
+    .substr(2, 11);
 
   // POST with body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/guides/direct-message-migration.html
   const response = await client.post("direct_messages/events/new", {
@@ -154,10 +157,10 @@ it("should DM user", async () => {
       type: "message_create",
       message_create: {
         target: {
-          recipient_id: "15008676"
+          recipient_id: "50426068"
         },
         message_data: {
-          text: "Hello from twitter-lite"
+          text: randomString
         }
       }
     }
@@ -169,7 +172,7 @@ it("should DM user", async () => {
       created_timestamp: expect.any(String),
       message_create: {
         message_data: {
-          text: "Hello from twitter-lite"
+          text: randomString
         }
       }
     }
