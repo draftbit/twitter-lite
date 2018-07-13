@@ -157,14 +157,21 @@ it("should DM user", async () => {
           recipient_id: "15008676"
         },
         message_data: {
-          text: "Hello World!"
+          text: "Hello from twitter-lite"
         }
       }
     }
   });
   expect(response).toMatchObject({
     event: {
-      type: "message_create"
+      type: "message_create",
+      id: expect.stringMatching(/^\d+$/),
+      created_timestamp: expect.any(String),
+      message_create: {
+        message_data: {
+          text: "Hello from twitter-lite"
+        }
+      }
     }
   });
 });
