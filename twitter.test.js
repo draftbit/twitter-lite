@@ -18,163 +18,155 @@ function newClient(subdomain = "api") {
   });
 }
 
-it("should default export to be a function", () => {
-  expect(new Twitter()).toBeInstanceOf(Twitter);
-});
-
-it("should return the API URL", () => {
-  expect(new Twitter().url).toEqual("https://api.twitter.com/1.1");
-});
-
-it("should return a stream API URL", () => {
-  const options = { subdomain: "stream" };
-  expect(new Twitter(options).url).toEqual("https://stream.twitter.com/1.1");
-});
-
-it("should fail on invalid access_token_secret", async () => {
-  const client = new Twitter({
-    subdomain: "api",
-    consumer_key: TWITTER_CONSUMER_KEY,
-    consumer_secret: TWITTER_CONSUMER_SECRET,
-    access_token_key: ACCESS_TOKEN,
-    access_token_secret: "xyz"
+describe("core", () => {
+  it("should default export to be a function", () => {
+    expect(new Twitter()).toBeInstanceOf(Twitter);
   });
 
-  const results = await client.get("account/verify_credentials");
-  expect(results).toEqual({
-    errors: [{ code: 32, message: "Could not authenticate you." }]
+  it("should return the API URL", () => {
+    expect(new Twitter().url).toEqual("https://api.twitter.com/1.1");
+  });
+
+  it("should return a stream API URL", () => {
+    const options = { subdomain: "stream" };
+    expect(new Twitter(options).url).toEqual("https://stream.twitter.com/1.1");
   });
 });
 
-it("should fail on invalid or expired token", async () => {
-  const client = new Twitter({
-    subdomain: "api",
-    consumer_key: "xyz",
-    consumer_secret: "xyz",
-    access_token_key: "xyz",
-    access_token_secret: "xyz"
+describe("auth", () => {
+  it("should fail on invalid access_token_secret", async () => {
+    const client = new Twitter({
+      subdomain: "api",
+      consumer_key: TWITTER_CONSUMER_KEY,
+      consumer_secret: TWITTER_CONSUMER_SECRET,
+      access_token_key: ACCESS_TOKEN,
+      access_token_secret: "xyz"
+    });
+
+    const results = await client.get("account/verify_credentials");
+    expect(results).toEqual({
+      errors: [{ code: 32, message: "Could not authenticate you." }]
+    });
   });
 
-  const results = await client.get("account/verify_credentials");
-  expect(results).toEqual({
-    errors: [{ code: 89, message: "Invalid or expired token." }]
+  it("should fail on invalid or expired token", async () => {
+    const client = new Twitter({
+      subdomain: "api",
+      consumer_key: "xyz",
+      consumer_secret: "xyz",
+      access_token_key: "xyz",
+      access_token_secret: "xyz"
+    });
+
+    const results = await client.get("account/verify_credentials");
+    expect(results).toEqual({
+      errors: [{ code: 89, message: "Invalid or expired token." }]
+    });
+  });
+
+  it("should verify credentials with correct tokens", async () => {
+    const client = newClient();
+
+    const response = await client.get("account/verify_credentials");
+    expect(response).toMatchObject({
+      created_at: "Wed Mar 14 21:17:37 +0000 2018",
+      name: "Nodejs Testing Account",
+      lang: "en",
+      screen_name: "nodejs_lite",
+      description: "Twitter Lite Testing Account"
+    });
   });
 });
 
-it("should verify credentials with correct tokens", async () => {
-  const client = newClient();
+describe("misc", () => {
+  let client;
+  beforeAll(() => (client = newClient()));
 
-  const response = await client.get("account/verify_credentials");
-  const results = {
-    created_at: response.created_at,
-    name: response.name,
-    lang: response.lang,
-    screen_name: response.screen_name,
-    description: response.description
-  };
+  it("should show 2 favorited tweets", async () => {
+    const response = await client.get("favorites/list");
+    const [first, second] = response;
 
-  expect(results).toEqual({
-    created_at: "Wed Mar 14 21:17:37 +0000 2018",
-    name: "Nodejs Testing Account",
-    lang: "en",
-    screen_name: "nodejs_lite",
-    description: "Twitter Lite Testing Account"
-  });
-});
-
-it("should show 2 favorited tweets", async () => {
-  const client = newClient();
-
-  const response = await client.get("favorites/list");
-  const [first, second] = response;
-
-  const results = [
-    {
-      id: first.id
-    },
-    {
-      id: second.id
-    }
-  ];
-
-  expect(results).toEqual([
-    {
-      id: 973775515453722600
-    },
-    {
-      id: 972868365898334200
-    }
-  ]);
-});
-
-it("should fail to follow unspecified user", async () => {
-  const client = newClient();
-
-  const response = await client.post("friendships/create");
-  expect(response).toEqual({
-    errors: [
+    const results = [
       {
-        code: 108,
-        message: "Cannot find specified user."
+        id: first.id
+      },
+      {
+        id: second.id
       }
-    ]
+    ];
+
+    expect(results).toEqual([
+      {
+        id: 973775515453722600
+      },
+      {
+        id: 972868365898334200
+      }
+    ]);
   });
-});
 
-it("should follow user", async () => {
-  const client = newClient();
-
-  // This is counter-intuitive - see https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433
-  const response = await client.post("friendships/create", null, {
-    screen_name: "dandv"
+  it("should fail to follow unspecified user", async () => {
+    const response = await client.post("friendships/create");
+    expect(response).toEqual({
+      errors: [
+        {
+          code: 108,
+          message: "Cannot find specified user."
+        }
+      ]
+    });
   });
-  expect(response).toMatchObject({
-    name: "Dan Dascalescu"
+
+  it("should follow user", async () => {
+    // This is counter-intuitive - see https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433
+    const response = await client.post("friendships/create", null, {
+      screen_name: "dandv"
+    });
+    expect(response).toMatchObject({
+      name: "Dan Dascalescu"
+    });
   });
-});
 
-it("should unfollow user", async () => {
-  const client = newClient();
-
-  // This is counter-intuitive - see above
-  const response = await client.post("friendships/destroy", null, {
-    user_id: "15008676"
+  it("should unfollow user", async () => {
+    // This is counter-intuitive - see above
+    const response = await client.post("friendships/destroy", null, {
+      user_id: "15008676"
+    });
+    expect(response).toMatchObject({
+      name: "Dan Dascalescu"
+    });
   });
-  expect(response).toMatchObject({
-    name: "Dan Dascalescu"
-  });
-});
 
-it("should DM user", async () => {
-  const client = newClient();
-  const randomString = Math.random()
-    .toString(36)
-    .substr(2, 11);
+  it.skip("should DM user", async () => {
+    const randomString = Math.random()
+      .toString(36)
+      .substr(2, 11);
 
-  // POST with body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/guides/direct-message-migration.html
-  const response = await client.post("direct_messages/events/new", {
-    event: {
-      type: "message_create",
-      message_create: {
-        target: {
-          recipient_id: "50426068"
-        },
-        message_data: {
-          text: randomString
+    // POST with body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/guides/direct-message-migration.html
+    const response = await client.post("direct_messages/events/new", {
+      event: {
+        type: "message_create",
+        message_create: {
+          target: {
+            recipient_id: "50426068"
+          },
+          message_data: {
+            text: randomString
+          }
         }
       }
-    }
-  });
-  expect(response).toMatchObject({
-    event: {
-      type: "message_create",
-      id: expect.stringMatching(/^\d+$/),
-      created_timestamp: expect.any(String),
-      message_create: {
-        message_data: {
-          text: randomString
+    });
+    expect(response).toMatchObject({
+      event: {
+        type: "message_create",
+        id: expect.stringMatching(/^\d+$/),
+        created_timestamp: expect.any(String),
+        message_create: {
+          message_data: {
+            text: randomString
+          }
         }
       }
-    }
+    });
   });
 });
