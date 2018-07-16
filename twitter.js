@@ -61,7 +61,7 @@ class Twitter {
       method: "POST"
     };
 
-    var parameters = {};
+    let parameters = {};
     if (twitterCallbackUrl) parameters = { oauth_callback: twitterCallbackUrl };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
@@ -78,13 +78,34 @@ class Twitter {
     return results;
   }
 
+  async getBearerToken() {
+    const requestData = {
+      url: "https://api.twitter.com/oauth2/token",
+      method: "POST"
+    };
+
+    const headers = this.client.toHeader(
+      this.client.authorize(requestData, {})
+    );
+
+    const results = await Fetch(requestData.url, {
+      method: "POST",
+      body: "grant_type=client_credentials",
+      headers: Object.assign({}, baseHeaders, headers)
+    })
+      .then(res => res.text())
+      .then(txt => querystring.parse(txt));
+
+    return results;
+  }
+
   async getAccessToken(options) {
     const requestData = {
       url: `${this.oauth}/access_token`,
       method: "POST"
     };
 
-    var parameters = { oauth_verifier: options.verifier };
+    let parameters = { oauth_verifier: options.verifier };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
@@ -105,10 +126,10 @@ class Twitter {
     return results;
   }
 
-  async get(resource, parameters) {
+  _makeRequest(method, resource, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
-      method: "GET"
+      method
     };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
@@ -122,6 +143,18 @@ class Twitter {
         Authorization: `Bearer ${this.config.bearer_token}`
       };
     }
+    return {
+      requestData,
+      headers
+    };
+  }
+
+  async get(resource, parameters) {
+    const { requestData, headers } = this._makeRequest(
+      "GET",
+      resource,
+      parameters
+    );
 
     const results = await Fetch(requestData.url, { headers }).then(res =>
       res.json()
@@ -130,23 +163,11 @@ class Twitter {
   }
 
   async post(resource, body, parameters) {
-    const requestData = {
-      url: `${this.url}/${resource}.json`,
-      method: "POST"
-    };
-
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
-
-    let headers = {};
-    if (this.authType === "User") {
-      headers = this.client.toHeader(
-        this.client.authorize(requestData, this.token)
-      );
-    } else {
-      headers = {
-        Authorization: `Bearer ${this.config.bearer_token}`
-      };
-    }
+    const { requestData, headers } = this._makeRequest(
+      "POST",
+      resource,
+      parameters
+    );
 
     const results = await Fetch(requestData.url, {
       method: "POST",
