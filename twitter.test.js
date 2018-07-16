@@ -137,7 +137,7 @@ describe("misc", () => {
     });
   });
 
-  it.skip("should DM user", async () => {
+  it("should DM user", async () => {
     const randomString = Math.random()
       .toString(36)
       .substr(2, 11);
@@ -168,5 +168,16 @@ describe("misc", () => {
         }
       }
     });
+  });
+
+  it("should get details about 100 users with 18-character ids", async () => {
+    // https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
+    // says to use POST (and presumably put the request in the body) but that
+    // returns an error that no users were found. Test that GET does work.
+    const client = newClient();
+    const users = await client.get("users/lookup", {
+      user_id: [...Array(99).fill("928759224599040001"), "711030662728437760"]
+    });
+    expect(users).toHaveLength(2);
   });
 });
