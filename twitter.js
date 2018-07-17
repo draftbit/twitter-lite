@@ -55,6 +55,25 @@ class Twitter {
     this.config = config;
   }
 
+  async getBearerToken() {
+    const headers = {
+      Authorization:
+        "Basic " +
+        Buffer.from(
+          this.config.consumer_key + ":" + this.config.consumer_secret
+        ).toString("base64"),
+      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+    };
+
+    const results = await Fetch("https://api.twitter.com/oauth2/token", {
+      method: "POST",
+      body: "grant_type=client_credentials",
+      headers
+    }).then(res => res.json());
+
+    return results;
+  }
+
   async getRequestToken(twitterCallbackUrl) {
     const requestData = {
       url: `${this.oauth}/request_token`,
@@ -70,27 +89,6 @@ class Twitter {
 
     const results = await Fetch(requestData.url, {
       method: "POST",
-      headers: Object.assign({}, baseHeaders, headers)
-    })
-      .then(res => res.text())
-      .then(txt => querystring.parse(txt));
-
-    return results;
-  }
-
-  async getBearerToken() {
-    const requestData = {
-      url: "https://api.twitter.com/oauth2/token",
-      method: "POST"
-    };
-
-    const headers = this.client.toHeader(
-      this.client.authorize(requestData, {})
-    );
-
-    const results = await Fetch(requestData.url, {
-      method: "POST",
-      body: "grant_type=client_credentials",
       headers: Object.assign({}, baseHeaders, headers)
     })
       .then(res => res.text())

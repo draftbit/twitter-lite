@@ -76,6 +76,28 @@ describe("auth", () => {
       description: "Twitter Lite Testing Account"
     });
   });
+
+  it("should use bearer token successfully", async () => {
+    const user = new Twitter({
+      consumer_key: TWITTER_CONSUMER_KEY,
+      consumer_secret: TWITTER_CONSUMER_SECRET
+    });
+
+    const response = await user.getBearerToken();
+    expect(response).toMatchObject({
+      token_type: "bearer"
+    });
+    const app = new Twitter({
+      bearer_token: response.access_token
+    });
+    const rateLimits = await app.get("application/rate_limit_status", {
+      resources: "statuses"
+    });
+    // This rate limit is 75 for user auth and 300 for app auth
+    expect(
+      rateLimits.resources.statuses["/statuses/retweeters/ids"].limit
+    ).toEqual(300);
+  });
 });
 
 describe("misc", () => {
@@ -137,7 +159,7 @@ describe("misc", () => {
     });
   });
 
-  it("should DM user", async () => {
+  it.skip("should DM user", async () => {
     const randomString = Math.random()
       .toString(36)
       .substr(2, 11);
