@@ -212,17 +212,17 @@ await client.post("friendships/create", null, {
 
 Note: [for now](https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433), make sure to pass a `null` body to `.post`. This is subject to change in a future version of the library.
 
-### getBearerToken()
+### .getBearerToken()
 
-See the example above.
+See the [app authenticatio example](#app-authentication-example).
 
 ### .getRequestToken(twitterCallbackUrl)
 
-See the example above.
+See the [OAuth example](#oauth-authentication).
 
 ### .getAccessToken(options)
 
-See the example above.
+See the [OAuth example](#oauth-authentication).
 
 ## Troubleshooting
 
