@@ -1,23 +1,30 @@
 # Twitter Lite
 
-A tiny Nodejs library for the Twitter API
+A tiny, full-featured, modern client / server library for the [Twitter API](https://developer.twitter.com/en/docs/basics/things-every-developer-should-know).
 
 [![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/Preposterous/twitter-lite.svg?branch=master)](https://travis-ci.org/Preposterous/twitter-lite)
 
 ## Features
 
 * Promise driven via Async / Await
+* Both REST and Stream support
+* Works both in Node and in browsers
 * Up-to-date APIs
-* Stream support
 * Under 1kb
+* Minimal dependencies
+* Test suite
+
+## Why
+
+We have built this library because existing ones [have not been recently maintained](https://github.com/desmondmorris/node-twitter), or depend on [outdated](https://github.com/ttezel/twit/issues/411) [libraries](https://github.com/ttezel/twit/issues/412).
 
 ## Installation
 
-```zsh
+```sh
 yarn add twitter-lite
 ```
 
-```zsh
+```sh
 npm install twitter-lite
 ```
 
@@ -26,12 +33,13 @@ npm install twitter-lite
 * Create an app on [https://apps.twitter.com/](https://apps.twitter.com)
 * Grab the Consumer Key (API Key) and Consumer Secret (API Secret) from Keys and Access Tokens
 * Make sure you set the right access level for your app
+* If you want to use user-based authentication, grab the access token key and secret as well
 
-### App vs. User
+### App vs. User authentication
 
 Twitter has two different authentication options:
 
-* App: higher rate limits. Great for building your own Twitter App
+* App: higher rate limits. Great for building your own Twitter App.
 * User: lower rate limits. Great for making requests on behalf of a User.
 
 **User** authentication requires:
@@ -53,7 +61,42 @@ headers: {
 }
 ```
 
-### Oauth Authentication
+You can get the bearer token by calling `.getBearerToken()`.
+
+### Verifying credentials example (user auth)
+
+```es6
+const client = new Twitter({
+  subdomain: "api",
+  consumer_key: "abc", // from Twitter.
+  consumer_secret: "def", // from Twitter.
+  access_token_key: "uvw", // from your User (oauth_token)
+  access_token_secret: "xyz" // from your User (oauth_token_secret)
+});
+
+client
+  .get("account/verify_credentials")
+  .then(results => {
+    console.log("results", results);
+  })
+  .catch(console.error);
+```
+
+### App authentication example
+
+```es6
+const user = new Twitter({
+  consumer_key: "abc",
+  consumer_secret: "def",
+});
+
+const response = await user.getBearerToken();
+const app = new Twitter({
+  bearer_token: response.access_token
+});
+```
+
+### Oauth authentication
 
 According to the [docs](https://developer.twitter.com/en/docs/basics/authentication/api-reference/authenticate) this helps you get access token from your users.
 
@@ -104,63 +147,9 @@ client
 
 And this will return you your `access_token` and `access_token_secret`.
 
-### Verifying Credentials Example (User auth)
-
-```es6
-const client = new Twitter({
-  subdomain: "api",
-  consumer_key: "xyz", // from Twitter.
-  consumer_secret: "xyz", // from Twitter.
-  access_token_key: "abc", // from your User (oauth_token)
-  access_token_secret: "abc" // from your User (oauth_token_secret)
-});
-
-client
-  .get("account/verify_credentials")
-  .then(results => {
-    console.log("results", results);
-  })
-  .catch(console.error);
-```
-
-### App authentication Example
-
-```es6
-const client = new Twitter({
-  subdomain: "api",
-  bearer_token: "Bearer ABC123XYZ" // generate a Bearer token
-});
-
-client
-  .get("users/lookup")
-  .then(results => {
-    console.log("results", results);
-  })
-  .catch(console.error);
-```
-
-## POST methods
-
-Use the `.post` method for actions that change state, as documented in the Twitter API. For [example](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create.html), to follow a user:
-
-```js
-const client = new Twitter({
-  consumer_key: "xyz",
-  consumer_secret: "xyz",
-  access_token_key: "abc",
-  access_token_secret: "abc"
-});
-
-await client.post("friendships/create", null, {
-  screen_name: 'dandv'
-});
-```
-
-Note: [for now](https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433), make sure to pass a `null` body to `.post`. This is subject to change in a future version of the library.
-
 ## Streams
 
-To learn more about the streaming API visit the [Twitter Docs](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter.html).
+To learn more about the streaming API visit the [Twitter Docs](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter.html). The streaming API works only in Node.
 
 ```es6
 const client = new Twitter({
@@ -187,28 +176,75 @@ client.stream("statuses/filter", parameters)
 client.stream.destroy(); // emits "end" and "error" event
 ```
 
+## Methods
+
+### .get(endpoint, parameters)
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz",
+  access_token_key: "abc",
+  access_token_secret: "abc"
+});
+
+const rateLimits = await app.get("statuses/show", {
+  id: "1016078154497048576",
+});
+```
+
+### .post(endpoint, body, parameters)
+
+Use the `.post` method for actions that change state, as documented in the Twitter API. For [example](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create.html), to follow a user:
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz",
+  access_token_key: "abc",
+  access_token_secret: "abc"
+});
+
+await client.post("friendships/create", null, {
+  screen_name: "dandv"
+});
+```
+
+Note: [for now](https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433), make sure to pass a `null` body to `.post`. This is subject to change in a future version of the library.
+
+### getBearerToken()
+
+See the example above.
+
+### .getRequestToken(twitterCallbackUrl)
+
+See the example above.
+
+### .getAccessToken(options)
+
+See the example above.
+
 ## Troubleshooting
 
 ### API Errors
 
-Api errors are returned (with "catch" in the Promise api or with "err" param in the callback api) as an array of errors.
-Thus errors described in twitter docs for example as:
+API errors are returned as an array of errors under the `errors` key of the response object. Make sure to check for the presence of this field, in addition to any try/catch blocks you may have.
 
-```JSON
- { "errors": [ { "code": 88, "message": "Rate limit exceeded" } ] }
-```
+### Numeric vs. string IDs
 
-Would return as :
-
-```
- [ { "code": 88, "message": "Rate limit exceeded" } ]
-```
+Twitter uses [numeric IDs](https://developer.twitter.com/en/docs/basics/twitter-ids.html) that in practice can be up to 18 characters long. Due to rounding errors, it's [unsafe to use numeric IDs in JavaScript](https://developer.twitter.com/en/docs/basics/things-every-developer-should-know). Always set `stringify_ids: true` when possible, so that Twitter will return strings instead of numbers, and rely on the `id_str` field, rather than on the `id` field.
 
 ## Credit
+
+Authors:
+
+* [@peterpme](https://github.com/peterpme)
+* [@dandv](https://github.com/dandv)
 
 Over the years, thanks to:
 
 * [@technoweenie](http://github.com/technoweenie)
 * [@jdub](http://github.com/jdub)
 * [@desmondmorris](http://github.com/desmondmorris)
+* [@ttezel](https://github.com/ttezel)
 * [Node Twitter Community](https://github.com/desmondmorris/node-twitter/graphs/contributors)
