@@ -104,25 +104,30 @@ describe("misc", () => {
   let client;
   beforeAll(() => (client = newClient()));
 
-  it("should show 2 favorited tweets", async () => {
+  it("should get full text of retweeted tweet", async () => {
+    const response = await client.get("statuses/show", {
+      id: "1019171288533749761", // a retweet by @dandv of @naval
+      tweet_mode: "extended"
+    });
+    // This is @naval's original tweet
+    expect(response.retweeted_status.full_text).toEqual(
+      "@jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income exceeds your burn rate, or when you can make a living doing what you love."
+    );
+    // For the retwee, "truncated" comes misleadingly set to "false" from the API, and the "full_text" is limited to 140 chars
+    expect(response.truncated).toEqual(false);
+    expect(response.full_text).toEqual(
+      "RT @naval: @jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income…"
+    );
+  });
+
+  it("should show 2+ favorited tweets", async () => {
     const response = await client.get("favorites/list");
-    const [first, second] = response;
-
-    const results = [
+    expect(response.slice(0, 2)).toMatchObject([
       {
-        id: first.id
+        id_str: "973775515453722624"
       },
       {
-        id: second.id
-      }
-    ];
-
-    expect(results).toEqual([
-      {
-        id: 973775515453722600
-      },
-      {
-        id: 972868365898334200
+        id_str: "972868365898334208"
       }
     ]);
   });
@@ -159,7 +164,7 @@ describe("misc", () => {
     });
   });
 
-  it.skip("should DM user", async () => {
+  it("should DM user", async () => {
     const randomString = Math.random()
       .toString(36)
       .substr(2, 11);
