@@ -236,7 +236,7 @@ Twitter uses [numeric IDs](https://developer.twitter.com/en/docs/basics/twitter-
 
 ## Contributing
 
-With the library nearing v1.0, contributions are welcome! Areas especially in need of help involve multimedia (see [#33](https://github.com/Preposterous/twitter-lite/issues/33) for example), adding tests, and [getting v1.0 out the door](https://github.com/Preposterous/twitter-lite/issues/21).
+With the library nearing v1.0, contributions are welcome! Areas especially in need of help involve multimedia (see [#33](https://github.com/Preposterous/twitter-lite/issues/33) for example), adding tests (see [these](https://github.com/ttezel/twit/tree/master/tests) for reference), and [getting v1.0 out the door](https://github.com/Preposterous/twitter-lite/issues/21).
 
 ### Development
 
