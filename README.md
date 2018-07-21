@@ -6,13 +6,13 @@ A tiny, full-featured, modern client / server library for the [Twitter API](http
 
 ## Features
 
-* Promise driven via Async / Await
-* Both REST and Stream support
-* Works both in Node and in browsers
-* Up-to-date APIs
-* Under 1kb
-* Minimal dependencies
-* Test suite
+- Promise driven via Async / Await
+- Both REST and Stream support
+- Works both in Node and in browsers
+- Up-to-date APIs
+- Under 1kb
+- Minimal dependencies
+- Test suite
 
 ## Why
 
@@ -30,28 +30,28 @@ npm install twitter-lite
 
 ## Usage
 
-* Create an app on [https://apps.twitter.com/](https://apps.twitter.com)
-* Grab the Consumer Key (API Key) and Consumer Secret (API Secret) from Keys and Access Tokens
-* Make sure you set the right access level for your app
-* If you want to use user-based authentication, grab the access token key and secret as well
+- Create an app on [https://apps.twitter.com/](https://apps.twitter.com)
+- Grab the Consumer Key (API Key) and Consumer Secret (API Secret) from Keys and Access Tokens
+- Make sure you set the right access level for your app
+- If you want to use user-based authentication, grab the access token key and secret as well
 
 ### App vs. User authentication
 
 Twitter has two different authentication options:
 
-* App: higher rate limits. Great for building your own Twitter App.
-* User: lower rate limits. Great for making requests on behalf of a User.
+- App: higher rate limits. Great for building your own Twitter App.
+- User: lower rate limits. Great for making requests on behalf of a User.
 
 **User** authentication requires:
 
-* `consumer_key`
-* `consumer_secret`
-* `access_token_key`
-* `access_token_secret`
+- `consumer_key`
+- `consumer_secret`
+- `access_token_key`
+- `access_token_secret`
 
 **App** authentication requires:
 
-* `bearer_token`
+- `bearer_token`
 
 App authentication is a simple header behind the scenes:
 
@@ -100,8 +100,8 @@ const app = new Twitter({
 
 According to the [docs](https://developer.twitter.com/en/docs/basics/authentication/api-reference/authenticate) this helps you get access token from your users.
 
-* [Request Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token)
-* [Access Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token)
+- [Request Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token)
+- [Access Token documentation](https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token)
 
 ```es6
 const client = new Twitter({
@@ -234,17 +234,39 @@ API errors are returned as an array of errors under the `errors` key of the resp
 
 Twitter uses [numeric IDs](https://developer.twitter.com/en/docs/basics/twitter-ids.html) that in practice can be up to 18 characters long. Due to rounding errors, it's [unsafe to use numeric IDs in JavaScript](https://developer.twitter.com/en/docs/basics/things-every-developer-should-know). Always set `stringify_ids: true` when possible, so that Twitter will return strings instead of numbers, and rely on the `id_str` field, rather than on the `id` field.
 
-## Credit
+## Contributing
+
+With the library nearing v1.0, contributions are welcome! Areas especially in need of help involve multimedia (see [#33](https://github.com/Preposterous/twitter-lite/issues/33) for example), adding tests, and [getting v1.0 out the door](https://github.com/Preposterous/twitter-lite/issues/21).
+
+### Development
+
+1.  Fork/clone the repo
+2.  `yarn/npm install`
+3.  Go to https://apps.twitter.com and create an app for testing this module. Make sure it has read/write permissions.
+4.  Grab the consumer key/secret, and the access token/secret and place them in a [.env](https://www.npmjs.com/package/dotenv) file in the project's root directory, under the following variables:
+    ```
+    TWITTER_CONSUMER_KEY=...
+    TWITTER_CONSUMER_SECRET=...
+    ACCESS_TOKEN=...
+    ACCESS_TOKEN_SECRET=...
+    ```
+5.  `yarn/npm test` and make sure all tests pass
+6.  Add your contribution, along with test case(s). Note: feel free to skip the ["should DM user"](https://github.com/Preposterous/twitter-lite/blob/34e8dbb3efb9a45564275f16473af59dbc4409e5/twitter.test.js#L167) test during development by changing that `it()` call to `it.skip()`, but remember to revert that change before committing. This will prevent your account from being flagged as [abusing the API to send too many DMs](https://github.com/Preposterous/twitter-lite/commit/5ee2ce4232faa07453ea2f0b4d63ee7a6d119ce7).
+7.  When all tests pass, run `npm run precommit` for linting with [prettier](https://www.npmjs.com/package/prettier)
+8.  Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash all your commits into one!)
+9.  `git push` and submit your PR!
+
+## Credits
 
 Authors:
 
-* [@peterpme](https://github.com/peterpme)
-* [@dandv](https://github.com/dandv)
+- [@peterpme](https://github.com/peterpme)
+- [@dandv](https://github.com/dandv)
 
 Over the years, thanks to:
 
-* [@technoweenie](http://github.com/technoweenie)
-* [@jdub](http://github.com/jdub)
-* [@desmondmorris](http://github.com/desmondmorris)
-* [@ttezel](https://github.com/ttezel)
-* [Node Twitter Community](https://github.com/desmondmorris/node-twitter/graphs/contributors)
+- [@technoweenie](http://github.com/technoweenie)
+- [@jdub](http://github.com/jdub)
+- [@desmondmorris](http://github.com/desmondmorris)
+- [@ttezel](https://github.com/ttezel)
+- [Node Twitter Community](https://github.com/desmondmorris/node-twitter/graphs/contributors)

@@ -1,16 +1,22 @@
 {
   "name": "twitter-lite",
   "version": "0.6.0",
-  "description":
-    "A tiny, full-featured client / server library for the Twitter API",
-  "source": ["twitter.js", "stream.js"],
+  "description": "A tiny, full-featured client / server library for the Twitter API",
+  "source": [
+    "twitter.js",
+    "stream.js"
+  ],
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
   "repository": "preposterous/twitter-lite",
   "homepage": "https://github.com/preposterous/twitter-lite",
   "author": "Peter Piekarczyk <peter@peterp.me>",
   "license": "MIT",
-  "files": ["twitter.js", "stream.js", "dist"],
+  "files": [
+    "twitter.js",
+    "stream.js",
+    "dist"
+  ],
   "keywords": [
     "twitter",
     "node-twitter",
@@ -29,7 +35,7 @@
     "dotenv": "^5.0.1",
     "flow-bin": "^0.68.0",
     "husky": "^0.14.3",
-    "jest": "^22.3.0",
+    "jest": "^22.4.4",
     "lint-staged": "^7.0.5",
     "microbundle": "^0.4.3",
     "prettier": "^1.11.1"
@@ -37,11 +43,13 @@
   "scripts": {
     "prepare": "microbundle",
     "test": "jest",
-    "release":
-      "npm run -s prepare && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
+    "release": "npm run -s prepare && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish",
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.{js,json,css,md}": ["prettier --write", "git add"]
+    "*.{js,json,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }
