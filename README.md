@@ -180,7 +180,7 @@ client.stream.destroy(); // emits "end" and "error" event
 
 ### .get(endpoint, parameters)
 
-Returns a Promise resolving to the API response object, or rejecting on error. The response object also contains the HTTP response code and [headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html), under the `_header` key. These are useful to check for [rate limit](#rate-limiting) information.
+Returns a Promise resolving to the API response object, or rejecting on error. The response and error objects also contain the HTTP response code and [headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html), under the `_headers` key. These are useful to check for [rate limit](#rate-limiting) information.
 
 ```es6
 const client = new Twitter({
@@ -234,7 +234,7 @@ See the [OAuth example](#oauth-authentication).
 
 **Breaking change in v0.7**
 
-Given that [developers expect promises to reject when they don't return the requested data](https://github.com/ttezel/twit/issues/256), `.get` and `.post` now reject instead of silently returning API errors as an array under the `errors` key of the response object. You can use try/catch to handle errors:
+Given that [developers expect promises to reject when they don't return the requested data](https://github.com/ttezel/twit/issues/256), `.get` and `.post` now reject instead of silently returning API errors as an array under the `errors` key of the response object. You can use try/catch to handle errors. The error object contains an `errors` property with the error `code` and `message`, and a `_headers` property with the the HTTP response code and [Headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html) object returned by the Twitter API. Note that each `_headers` property is an array, usually of length 1.
 
 ```es6
 try {

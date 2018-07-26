@@ -122,10 +122,6 @@ describe("rate limits", () => {
     } catch (e) {
       expect(e.errors[0]).toHaveProperty("code", 88); // Rate limit exceeded
       expect(e._headers).toHaveProperty("x-rate-limit-remaining", ["0"]);
-      console.log(
-        "Rate limit will reset on",
-        new Date(e._headers["x-rate-limit-reset"] * 1000)
-      );
     }
   });
 });
@@ -161,12 +157,7 @@ describe("misc", () => {
       await client.post("friendships/create");
     } catch (e) {
       expect(e).toMatchObject({
-        errors: [
-          {
-            code: 108,
-            message: "Cannot find specified user."
-          }
-        ]
+        errors: [{ code: 108, message: "Cannot find specified user." }]
       });
     }
   });
