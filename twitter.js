@@ -55,6 +55,20 @@ class Twitter {
     this.config = config;
   }
 
+  /**
+   * Parse the JSON from a Response object and add the Headers under _headers
+   * @param {Response} response - the Response object returned by Fetch
+   * @return {Promise<Object>}
+   * @private
+   */
+  static _handleResponse(response) {
+    const headers = response.headers.raw(); // https://github.com/bitinn/node-fetch/issues/495
+    return response.json().then(res => {
+      res._headers = headers;
+      return res;
+    });
+  }
+
   async getBearerToken() {
     const headers = {
       Authorization:
@@ -69,7 +83,7 @@ class Twitter {
       method: "POST",
       body: "grant_type=client_credentials",
       headers
-    }).then(res => res.json());
+    }).then(Twitter._handleResponse);
 
     return results;
   }
@@ -84,8 +98,9 @@ class Twitter {
     if (twitterCallbackUrl) parameters = { oauth_callback: twitterCallbackUrl };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
-    let headers = {};
-    headers = this.client.toHeader(this.client.authorize(requestData, {}));
+    const headers = this.client.toHeader(
+      this.client.authorize(requestData, {})
+    );
 
     const results = await Fetch(requestData.url, {
       method: "POST",
@@ -106,8 +121,7 @@ class Twitter {
     let parameters = { oauth_verifier: options.verifier };
     if (parameters) requestData.url += "?" + querystring.stringify(parameters);
 
-    let headers = {};
-    headers = this.client.toHeader(
+    const headers = this.client.toHeader(
       this.client.authorize(requestData, {
         key: options.key,
         secret: options.secret
@@ -124,6 +138,14 @@ class Twitter {
     return results;
   }
 
+  /**
+   * Construct the data and headers for an authenticated HTTP request to the Twitter API
+   * @param {string} method - "GET" or "POST"
+   * @param {string} resource - the API endpoint
+   * @param {object} parameters
+   * @return {{requestData: {url: string, method: string}, headers: ({Authorization: string}|OAuth.Header)}}
+   * @private
+   */
   _makeRequest(method, resource, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
@@ -147,37 +169,41 @@ class Twitter {
     };
   }
 
-  async get(resource, parameters) {
+  get(resource, parameters) {
     const { requestData, headers } = this._makeRequest(
       "GET",
       resource,
       parameters
     );
 
-    const results = await Fetch(requestData.url, { headers }).then(res =>
-      res.json()
-    );
-    return results;
+    return Fetch(requestData.url, { headers })
+      .then(Twitter._handleResponse)
+      .then(
+        results => ("errors" in results ? Promise.reject(results) : results)
+      );
   }
 
-  async post(resource, body, parameters) {
+  post(resource, body, parameters) {
     const { requestData, headers } = this._makeRequest(
       "POST",
       resource,
       parameters
     );
 
-    const results = await Fetch(requestData.url, {
+    return Fetch(requestData.url, {
       method: "POST",
       headers: Object.assign({}, baseHeaders, headers),
       body: JSON.stringify(body)
-    }).then(res => res.json());
-    return results;
+    })
+      .then(Twitter._handleResponse)
+      .then(
+        results => ("errors" in results ? Promise.reject(results) : results)
+      );
   }
 
   stream(resource, parameters) {
     if (this.authType !== "User")
-      throw Error("Streams require user context authentication");
+      throw new Error("Streams require user context authentication");
 
     const stream = new Stream();
 

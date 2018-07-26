@@ -43,10 +43,14 @@ describe("auth", () => {
       access_token_secret: "xyz"
     });
 
-    const results = await client.get("account/verify_credentials");
-    expect(results).toEqual({
-      errors: [{ code: 32, message: "Could not authenticate you." }]
-    });
+    expect.assertions(1);
+    try {
+      await client.get("account/verify_credentials");
+    } catch (e) {
+      expect(e).toMatchObject({
+        errors: [{ code: 32, message: "Could not authenticate you." }]
+      });
+    }
   });
 
   it("should fail on invalid or expired token", async () => {
@@ -58,10 +62,14 @@ describe("auth", () => {
       access_token_secret: "xyz"
     });
 
-    const results = await client.get("account/verify_credentials");
-    expect(results).toEqual({
-      errors: [{ code: 89, message: "Invalid or expired token." }]
-    });
+    expect.assertions(1);
+    try {
+      await client.get("account/verify_credentials");
+    } catch (e) {
+      expect(e).toMatchObject({
+        errors: [{ code: 89, message: "Invalid or expired token." }]
+      });
+    }
   });
 
   it("should verify credentials with correct tokens", async () => {
@@ -94,6 +102,34 @@ describe("auth", () => {
   });
 });
 
+describe("rate limits", () => {
+  let client;
+  beforeAll(() => (client = newClient()));
+
+  it("should get rate limited", async () => {
+    expect.assertions(2); // assume we were rate limited by a previous test and go straight to `catch`
+    try {
+      const response = await client.get("help/configuration");
+      // Since this didn't throw, we'll be running 2 more assertions below
+      expect.assertions(4);
+      expect(response).toHaveProperty("photo_sizes");
+      expect(response._headers).toHaveProperty("x-rate-limit-limit", ["15"]);
+      let [remaining] = response._headers["x-rate-limit-remaining"];
+      while (
+        remaining-- >= -1 // force exceeding the rate limit
+      )
+        await client.get("help/configuration");
+    } catch (e) {
+      expect(e.errors[0]).toHaveProperty("code", 88); // Rate limit exceeded
+      expect(e._headers).toHaveProperty("x-rate-limit-remaining", ["0"]);
+      console.log(
+        "Rate limit will reset on",
+        new Date(e._headers["x-rate-limit-reset"] * 1000)
+      );
+    }
+  });
+});
+
 describe("misc", () => {
   let client;
   beforeAll(() => (client = newClient()));
@@ -120,24 +156,28 @@ describe("misc", () => {
   });
 
   it("should fail to follow unspecified user", async () => {
-    const response = await client.post("friendships/create");
-    expect(response).toEqual({
-      errors: [
-        {
-          code: 108,
-          message: "Cannot find specified user."
-        }
-      ]
-    });
+    expect.assertions(1);
+    try {
+      await client.post("friendships/create");
+    } catch (e) {
+      expect(e).toMatchObject({
+        errors: [
+          {
+            code: 108,
+            message: "Cannot find specified user."
+          }
+        ]
+      });
+    }
   });
 
   it("should follow user", async () => {
     // This is counter-intuitive - see https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433
     const response = await client.post("friendships/create", null, {
-      screen_name: "dandv"
+      screen_name: "mdo"
     });
     expect(response).toMatchObject({
-      name: "Dan Dascalescu"
+      name: "Mark Otto"
     });
   });
 

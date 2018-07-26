@@ -7,9 +7,9 @@ A tiny, full-featured, modern client / server library for the [Twitter API](http
 ## Features
 
 - Promise driven via Async / Await
-- Both REST and Stream support
+- REST and Stream support
 - Works both in Node and in browsers
-- Up-to-date APIs
+- Rate limiting support
 - Under 1kb
 - Minimal dependencies
 - Test suite
@@ -180,6 +180,8 @@ client.stream.destroy(); // emits "end" and "error" event
 
 ### .get(endpoint, parameters)
 
+Returns a Promise resolving to the API response object, or rejecting on error. The response object also contains the HTTP response code and [headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html), under the `_header` key. These are useful to check for [rate limit](#rate-limiting) information.
+
 ```es6
 const client = new Twitter({
   consumer_key: "xyz",
@@ -194,6 +196,8 @@ const rateLimits = await app.get("statuses/show", {
 ```
 
 ### .post(endpoint, body, parameters)
+
+Same return as `.get()`.
 
 Use the `.post` method for actions that change state, as documented in the Twitter API. For [example](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create.html), to follow a user:
 
@@ -214,7 +218,7 @@ Note: [for now](https://github.com/Preposterous/twitter-lite/issues/15#issuecomm
 
 ### .getBearerToken()
 
-See the [app authenticatio example](#app-authentication-example).
+See the [app authentication example](#app-authentication-example).
 
 ### .getRequestToken(twitterCallbackUrl)
 
@@ -226,9 +230,33 @@ See the [OAuth example](#oauth-authentication).
 
 ## Troubleshooting
 
-### API Errors
+### API errors
 
-API errors are returned as an array of errors under the `errors` key of the response object. Make sure to check for the presence of this field, in addition to any try/catch blocks you may have.
+**Breaking change in v0.7**
+
+Given that [developers expect promises to reject when they don't return the requested data](https://github.com/ttezel/twit/issues/256), `.get` and `.post` now reject instead of silently returning API errors as an array under the `errors` key of the response object. You can use try/catch to handle errors:
+
+```es6
+try {
+  const response = await client.get("some/endpoint");
+  // ... use response here ...
+} catch (e) {
+  if ('errors' in e) {
+    // Twitter API error
+    if (e.errors[0].code === 88)
+      // rate limit exceeded
+      console.log("Rate limit will reset on", new Date(e._headers["x-rate-limit-reset"] * 1000));
+    else
+      // some other kind of error, e.g. read-only API trying to POST
+  } else {
+    // non-API error, e.g. network problem or invalid JSON in response
+  }
+}
+```
+
+#### Rate limiting
+
+A particular case of errors is exceeding the [rate limits](https://developer.twitter.com/en/docs/basics/rate-limits.html). See the example immediately above for detecting rate limit errors, and read [Twitter's documentation on rate limiting](https://developer.twitter.com/en/docs/basics/rate-limiting.html).
 
 ### Numeric vs. string IDs
 
@@ -242,7 +270,7 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
 
 1.  Fork/clone the repo
 2.  `yarn/npm install`
-3.  Go to https://apps.twitter.com and create an app for testing this module. Make sure it has read/write permissions.
+3.  Go to <https://apps.twitter.com> and create an app for testing this module. Make sure it has read/write permissions.
 4.  Grab the consumer key/secret, and the access token/secret and place them in a [.env](https://www.npmjs.com/package/dotenv) file in the project's root directory, under the following variables:
     ```
     TWITTER_CONSUMER_KEY=...
@@ -252,9 +280,11 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
     ```
 5.  `yarn/npm test` and make sure all tests pass
 6.  Add your contribution, along with test case(s). Note: feel free to skip the ["should DM user"](https://github.com/Preposterous/twitter-lite/blob/34e8dbb3efb9a45564275f16473af59dbc4409e5/twitter.test.js#L167) test during development by changing that `it()` call to `it.skip()`, but remember to revert that change before committing. This will prevent your account from being flagged as [abusing the API to send too many DMs](https://github.com/Preposterous/twitter-lite/commit/5ee2ce4232faa07453ea2f0b4d63ee7a6d119ce7).
-7.  When all tests pass, run `npm run precommit` for linting with [prettier](https://www.npmjs.com/package/prettier)
-8.  Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash all your commits into one!)
-9.  `git push` and submit your PR!
+7.  Make sure all tests pass.
+8.  `git add` the changed files
+9.  `npm run precommit` to lint with [prettier](https://www.npmjs.com/package/prettier)
+10. Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash all your commits into one!)
+11. `git push` and submit your PR!
 
 ## Credits
 
