@@ -18,6 +18,20 @@ function newClient(subdomain = "api") {
   });
 }
 
+// Used when testing DMs to avoid being flagged for abuse
+function randomString() {
+  return Math.random()
+    .toString(36)
+    .substr(2, 11);
+}
+
+function htmlEscape(string) {
+  return string
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 describe("core", () => {
   it("should default export to be a function", () => {
     expect(new Twitter()).toBeInstanceOf(Twitter);
@@ -126,6 +140,63 @@ describe("rate limits", () => {
   });
 });
 
+describe("posting", () => {
+  let client;
+  beforeAll(() => (client = newClient()));
+
+  it("should DM user", async () => {
+    const message = randomString(); // prevent overzealous abuse detection
+
+    // POST with JSON body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event
+    const response = await client.post("direct_messages/events/new", {
+      event: {
+        type: "message_create",
+        message_create: {
+          target: {
+            recipient_id: "50426068"
+          },
+          message_data: {
+            text: message
+          }
+        }
+      }
+    });
+    expect(response).toMatchObject({
+      event: {
+        type: "message_create",
+        id: expect.stringMatching(/^\d+$/),
+        created_timestamp: expect.any(String),
+        message_create: {
+          message_data: {
+            text: message
+          }
+        }
+      }
+    });
+  });
+
+  it("should post status update with escaped characters, then delete it", async () => {
+    const message = randomString(); // prevent overzealous abuse detection
+    const allTheCharacters = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
+
+    // https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
+    const response = await client.post("statuses/update", null, {
+      status: allTheCharacters + message + allTheCharacters
+    });
+
+    expect(response).toMatchObject({
+      text: htmlEscape(allTheCharacters + message + allTheCharacters)
+    });
+    const id = response.id_str;
+    const deleted = await client.post("statuses/destroy", null, {
+      id
+    });
+    expect(deleted).toMatchObject({
+      id_str: id
+    });
+  });
+});
+
 describe("misc", () => {
   let client;
   beforeAll(() => (client = newClient()));
@@ -182,47 +253,24 @@ describe("misc", () => {
     });
   });
 
-  it("should DM user", async () => {
-    const randomString = Math.random()
-      .toString(36)
-      .substr(2, 11);
-
-    // POST with body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/guides/direct-message-migration.html
-    const response = await client.post("direct_messages/events/new", {
-      event: {
-        type: "message_create",
-        message_create: {
-          target: {
-            recipient_id: "50426068"
-          },
-          message_data: {
-            text: randomString
-          }
-        }
-      }
-    });
-    expect(response).toMatchObject({
-      event: {
-        type: "message_create",
-        id: expect.stringMatching(/^\d+$/),
-        created_timestamp: expect.any(String),
-        message_create: {
-          message_data: {
-            text: randomString
-          }
-        }
-      }
-    });
-  });
-
   it("should get details about 100 users with 18-character ids", async () => {
-    // https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
-    // says to use POST (and presumably put the request in the body) but that
-    // returns an error that no users were found. Test that GET does work.
     const client = newClient();
-    const users = await client.get("users/lookup", {
-      user_id: [...Array(99).fill("928759224599040001"), "711030662728437760"]
+    const userIds = [
+      ...Array(99).fill("928759224599040001"),
+      "711030662728437760"
+    ].join(",");
+    const expectedIds = [
+      { id_str: "928759224599040001" },
+      { id_str: "711030662728437760" }
+    ];
+    // Use POST per https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
+    const usersPost = await client.post("users/lookup", null, {
+      user_id: userIds
     });
-    expect(users).toHaveLength(2);
+    delete usersPost._headers; // to not confuse Jest - https://github.com/facebook/jest/issues/5998#issuecomment-446827454
+    expect(usersPost).toMatchObject(expectedIds);
+    // Check if GET worked the same
+    const usersGet = await client.get("users/lookup", { user_id: userIds });
+    expect(usersGet.map(u => u)).toMatchObject(expectedIds); // map(u => u) is an alternative to deleting _headers
   });
 });

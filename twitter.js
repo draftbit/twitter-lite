@@ -31,10 +31,30 @@ const defaults = {
   bearer_token: null
 };
 
+// Twitter expects POST body parameters to be URL-encoded: https://developer.twitter.com/en/docs/basics/authentication/guides/creating-a-signature
+// However, some endpoints expect a JSON payload - https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event
+// It appears that JSON payloads don't need to be included in the signature,
+// because sending DMs works without signing the POST body
+const JSON_ENDPOINTS = [
+  "direct_messages/events/new",
+  "direct_messages/welcome_messages/new",
+  "direct_messages/welcome_messages/rules/new"
+];
+
 const baseHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json"
 };
+
+function percentEncode(string) {
+  // From OAuth.prototype.percentEncode
+  return string
+    .replace(/!/g, "%21")
+    .replace(/\*/g, "%2A")
+    .replace(/'/g, "%27")
+    .replace(/\(/g, "%28")
+    .replace(/\)/g, "%29");
+}
 
 class Twitter {
   constructor(options) {
@@ -64,7 +84,7 @@ class Twitter {
   static _handleResponse(response) {
     const headers = response.headers.raw(); // https://github.com/bitinn/node-fetch/issues/495
     return response.json().then(res => {
-      res._headers = headers;
+      res._headers = headers; // TODO: this creates an array-like object when it adds _headers to an array response
       return res;
     });
   }
@@ -151,7 +171,9 @@ class Twitter {
       url: `${this.url}/${resource}.json`,
       method
     };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters)
+      if (method === "POST") requestData.data = parameters;
+      else requestData.url += "?" + querystring.stringify(parameters);
 
     let headers = {};
     if (this.authType === "User") {
@@ -178,8 +200,8 @@ class Twitter {
 
     return Fetch(requestData.url, { headers })
       .then(Twitter._handleResponse)
-      .then(
-        results => ("errors" in results ? Promise.reject(results) : results)
+      .then(results =>
+        "errors" in results ? Promise.reject(results) : results
       );
   }
 
@@ -190,14 +212,22 @@ class Twitter {
       parameters
     );
 
+    const postHeaders = Object.assign({}, baseHeaders, headers);
+    if (JSON_ENDPOINTS.includes(resource)) {
+      body = JSON.stringify(body);
+    } else {
+      body = querystring.stringify(parameters);
+      postHeaders["Content-Type"] = "application/x-www-form-urlencoded";
+    }
+
     return Fetch(requestData.url, {
       method: "POST",
-      headers: Object.assign({}, baseHeaders, headers),
-      body: JSON.stringify(body)
+      headers: postHeaders,
+      body: percentEncode(body)
     })
       .then(Twitter._handleResponse)
-      .then(
-        results => ("errors" in results ? Promise.reject(results) : results)
+      .then(results =>
+        "errors" in results ? Promise.reject(results) : results
       );
   }
 
@@ -207,17 +237,26 @@ class Twitter {
 
     const stream = new Stream();
 
+    // POST the request, in order to accommodate long parameter lists, e.g.
+    // up to 5000 ids for statuses/filter - https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
     const requestData = {
       url: `${getUrl("stream")}/${resource}.json`,
-      method: "GET"
+      method: "POST"
     };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.data = parameters;
 
     const headers = this.client.toHeader(
       this.client.authorize(requestData, this.token)
     );
 
-    const request = Fetch(requestData.url, { headers });
+    const request = Fetch(requestData.url, {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: percentEncode(querystring.stringify(parameters))
+    });
 
     request
       .then(response => {
