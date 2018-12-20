@@ -87,7 +87,7 @@ client
 ```es6
 const user = new Twitter({
   consumer_key: "abc",
-  consumer_secret: "def",
+  consumer_secret: "def"
 });
 
 const response = await user.getBearerToken();
@@ -176,6 +176,8 @@ client.stream("statuses/filter", parameters)
 client.stream.destroy(); // emits "end" and "error" event
 ```
 
+To disconnect from a stream, call `stream.removeAllListeners()`;
+
 ## Methods
 
 ### .get(endpoint, parameters)
@@ -191,7 +193,7 @@ const client = new Twitter({
 });
 
 const rateLimits = await app.get("statuses/show", {
-  id: "1016078154497048576",
+  id: "1016078154497048576"
 });
 ```
 

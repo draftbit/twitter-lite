@@ -18,7 +18,7 @@ function newClient(subdomain = "api") {
   });
 }
 
-// Used when testing DMs to avoid being flagged for abuse
+// Used when testing DMs to avoid getting flagged for abuse
 function randomString() {
   return Math.random()
     .toString(36)
@@ -254,7 +254,6 @@ describe("misc", () => {
   });
 
   it("should get details about 100 users with 18-character ids", async () => {
-    const client = newClient();
     const userIds = [
       ...Array(99).fill("928759224599040001"),
       "711030662728437760"
@@ -272,5 +271,19 @@ describe("misc", () => {
     // Check if GET worked the same
     const usersGet = await client.get("users/lookup", { user_id: userIds });
     expect(usersGet.map(u => u)).toMatchObject(expectedIds); // map(u => u) is an alternative to deleting _headers
+  });
+
+  it("should be unable to get details about suspended user", async () => {
+    const nonexistentScreenName = randomString() + randomString();
+    try {
+      // https://twitter.com/fuckyou is actually a suspended user, but the API doesn't differentiate from nonexistent users
+      await client.get("users/lookup", {
+        screen_name: `fuckyou,${nonexistentScreenName}`
+      });
+    } catch (e) {
+      expect(e).toMatchObject({
+        errors: [{ code: 17, message: "No user matches for specified terms." }]
+      });
+    }
   });
 });

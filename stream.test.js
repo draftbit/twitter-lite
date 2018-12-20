@@ -23,13 +23,14 @@ it("should default export to be a function", () => {
   expect(new Stream()).toBeInstanceOf(Stream);
 });
 
-describe("functionality", () => {
-  let client;
-  beforeAll(() => (client = newClient()));
+let client;
+let stream;
+beforeAll(() => (client = newClient()));
 
+describe("functionality", () => {
   it("should filter realtime tweets from up to 5000 users", done => {
     // https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
-    const stream = client.stream("statuses/filter", {
+    stream = client.stream("statuses/filter", {
       follow: [
         // First pass a ton of accounts that don't tweet often (@dandv), to stress-test the POST body
         ...Array(4900).fill("15008676"),
@@ -126,4 +127,8 @@ describe("functionality", () => {
       done();
     });
   });
+});
+
+afterAll(() => {
+  stream.removeAllListeners();
 });
