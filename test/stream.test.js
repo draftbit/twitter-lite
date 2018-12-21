@@ -1,6 +1,6 @@
 require("dotenv").config();
-const Stream = require("./stream");
-const Twitter = require("./twitter");
+const Stream = require("../stream");
+const Twitter = require("../twitter");
 
 const {
   TWITTER_CONSUMER_KEY,
@@ -23,14 +23,12 @@ it("should default export to be a function", () => {
   expect(new Stream()).toBeInstanceOf(Stream);
 });
 
-let client;
-let stream;
-beforeAll(() => (client = newClient()));
+const client = newClient();
 
 describe("functionality", () => {
   it("should filter realtime tweets from up to 5000 users", done => {
     // https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
-    stream = client.stream("statuses/filter", {
+    const stream = client.stream("statuses/filter", {
       follow: [
         // First pass a ton of accounts that don't tweet often (@dandv), to stress-test the POST body
         ...Array(4900).fill("15008676"),
@@ -125,10 +123,24 @@ describe("functionality", () => {
     stream.on("data", tweet => {
       // Within seconds, one of those prolific accounts will tweet something
       done();
+      // Destroy the stream, or else the script will not terminate
+      stream.destroy();
     });
   });
-});
 
-afterAll(() => {
-  stream.removeAllListeners();
+  it("should switch from one stream to another", done => {
+    const stream1 = client.stream("statuses/filter", {
+      track: "the,to,and,in,you,for,my,at,me"
+    });
+    stream1.on("data", tweet => {
+      process.nextTick(() => stream1.destroy());
+      const stream2 = client.stream("statuses/filter", {
+        track: "i,a,is,it,of,on,that,with,do"
+      });
+      stream2.on("data", tweet => {
+        process.nextTick(() => stream2.destroy());
+        done();
+      });
+    });
+  });
 });

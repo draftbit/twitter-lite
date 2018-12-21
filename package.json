@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "A tiny, full-featured client / server library for the Twitter API",
   "source": [
     "twitter.js",
@@ -32,6 +32,7 @@
     "oauth-1.0a": "^2.2.4"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.10",
     "dotenv": "^5.0.1",
     "flow-bin": "^0.68.0",
     "husky": "^0.14.3",

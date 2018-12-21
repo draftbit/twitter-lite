@@ -160,23 +160,30 @@ const client = new Twitter({
 });
 
 const parameters = {
-  track: "#bitcoin,#litecoin,#monero", // #bitcoin, #litecoin, #monero
-  follow: "422297024,873788249839370240", // @OrchardAI, @tylerbuchea
-  locations: "-122.75,36.8,-121.75,37.8", // Bounding box -	San Francisco
+  track: "#bitcoin,#litecoin,#monero",
+  follow: "422297024,873788249839370240",  // @OrchardAI, @tylerbuchea
+  locations: "-122.75,36.8,-121.75,37.8",  // Bounding box -	San Francisco
 };
 
-client.stream("statuses/filter", parameters)
+const stream = client.stream("statuses/filter", parameters)
   .on("start", response => console.log("start"))
-  .on("data", data => console.log("data", data.text))
+  .on("data", tweet => console.log("data", tweet.text))
   .on("ping", () => console.log("ping"))
   .on("error", error => console.log("error", error))
   .on("end", response => console.log("end"));
 
-// to stop the stream:
-client.stream.destroy(); // emits "end" and "error" event
+// To stop the stream:
+process.nextTick(() => stream.destroy());  // emits "end" and "error" events
 ```
 
-To disconnect from a stream, call `stream.removeAllListeners()`;
+To stop a stream, call `stream.destroy()`. That might take a while though, if the stream receives a lot of traffic. Also, if you attempt to destroy a stream from an `on` handler, you may get an error about writing to a destroyed stream.
+To avoid both these issues, [defer](https://stackoverflow.com/questions/49804108/write-after-end-stream-error/53878933#53878933) the `destroy()` call:
+
+```es6
+process.nextTick(() => stream.destroy());
+```
+
+After you've destroyed a stream, you can create another one - see the ["should switch from one stream to another" test](blob/master/test/stream.test.js#L131).
 
 ## Methods
 

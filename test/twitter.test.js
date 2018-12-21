@@ -1,5 +1,5 @@
 require("dotenv").config();
-const Twitter = require("./twitter");
+const Twitter = require("../twitter");
 
 const {
   TWITTER_CONSUMER_KEY,

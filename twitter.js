@@ -260,7 +260,7 @@ class Twitter {
 
     request
       .then(response => {
-        this.stream.destroy = () => response.body.destroy();
+        stream.destroy = this.stream.destroy = () => response.body.destroy();
 
         response.status === 200
           ? stream.emit("start", response)
