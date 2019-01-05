@@ -208,7 +208,7 @@ const rateLimits = await app.get("statuses/show", {
 
 Same return as `.get()`.
 
-Use the `.post` method for actions that change state, as documented in the Twitter API. For [example](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create.html), to follow a user:
+Use the `.post` method for actions that change state, or when the total size of the parameters might be too long for a GET request. For [example](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create.html), to follow a user:
 
 ```es6
 const client = new Twitter({
@@ -222,8 +222,18 @@ await client.post("friendships/create", null, {
   screen_name: "dandv"
 });
 ```
+Note how the `body` is set to `null` when passing URL parameters. This is [subject to change](https://github.com/draftbit/twitter-lite/issues/21) in a future version of the library.
 
-Note: [for now](https://github.com/draftbit/twitter-lite/issues/15#issuecomment-402902433), make sure to pass a `null` body to `.post`. This is subject to change in a future version of the library.
+The second use case for POST is when you need to pass more parameters than suitable for the length of a URL, such as when [filtering tweets from up to 5000 specific users](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter):
+
+```es6
+const stream = client.stream("statuses/filter", {
+  follow: [
+    "15008676", ...,
+    ... // up to 5000 user IDs, which can be up to 18 characters each
+  ]
+});
+```
 
 ### .getBearerToken()
 
