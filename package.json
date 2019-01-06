@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "A tiny, full-featured client / server library for the Twitter API",
   "source": [
     "twitter.js",
@@ -8,8 +8,8 @@
   ],
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
-  "repository": "preposterous/twitter-lite",
-  "homepage": "https://github.com/preposterous/twitter-lite",
+  "repository": "draftbit/twitter-lite",
+  "homepage": "https://github.com/draftbit/twitter-lite",
   "author": "Peter Piekarczyk <peter@peterp.me>",
   "license": "MIT",
   "files": [
@@ -28,18 +28,18 @@
     "twitter api"
   ],
   "dependencies": {
-    "cross-fetch": "^1.1.1",
+    "cross-fetch": "^3.0.0",
     "oauth-1.0a": "^2.2.4"
   },
   "devDependencies": {
     "@types/jest": "^23.3.10",
-    "dotenv": "^5.0.1",
+    "dotenv": "^6.2.0",
     "flow-bin": "^0.68.0",
     "husky": "^0.14.3",
-    "jest": "^22.4.4",
-    "lint-staged": "^7.0.5",
+    "jest": "^23.6.0",
+    "lint-staged": "^8.1.0",
     "microbundle": "^0.4.3",
-    "prettier": "^1.11.1"
+    "prettier": "^1.15.3"
   },
   "scripts": {
     "prepare": "microbundle",
@@ -48,7 +48,7 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.{js,json,css,md}": [
+    "*.{js,md}": [
       "prettier --write",
       "git add"
     ]

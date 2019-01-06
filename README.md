@@ -183,7 +183,7 @@ To avoid both these issues, [defer](https://stackoverflow.com/questions/49804108
 process.nextTick(() => stream.destroy());
 ```
 
-After you've destroyed a stream, you can create another one - see the ["should switch from one stream to another" test](blob/master/test/stream.test.js#L131).
+After you've destroyed a stream, you can create another one - see the ["should switch from one stream to another" test](https://github.com/draftbit/twitter-lite/blob/9e0845585c756aee10e8b0acaabfbc3e4f32b81c/test/stream.test.js#L131).
 
 ## Methods
 
@@ -296,7 +296,7 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
 7.  Make sure all tests pass.
 8.  `git add` the changed files
 9.  `npm run precommit` to lint with [prettier](https://www.npmjs.com/package/prettier)
-10. Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash all your commits into one!)
+10. Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash commits into one per fix/improvement!)
 11. `git push` and submit your PR!
 
 ## Credits
