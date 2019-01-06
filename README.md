@@ -204,7 +204,7 @@ const rateLimits = await app.get("statuses/show", {
 });
 ```
 
-### .post(endpoint, body, parameters)
+### .post(endpoint, parameters)
 
 Same return as `.get()`.
 
@@ -218,20 +218,16 @@ const client = new Twitter({
   access_token_secret: "abc"
 });
 
-await client.post("friendships/create", null, {
+await client.post("friendships/create", {
   screen_name: "dandv"
 });
 ```
-Note how the `body` is set to `null` when passing URL parameters. This is [subject to change](https://github.com/draftbit/twitter-lite/issues/21) in a future version of the library.
 
-The second use case for POST is when you need to pass more parameters than suitable for the length of a URL, such as when [filtering tweets from up to 5000 specific users](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter):
+The second use case for POST is when you need to pass more parameters than suitable for the length of a URL, such as when [looking up a larger number of user ids or screen names](https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup):
 
 ```es6
-const stream = client.stream("statuses/filter", {
-  follow: [
-    "15008676", ...,
-    ... // up to 5000 user IDs, which can be up to 18 characters each
-  ]
+const users = await client.post("users/lookup", {
+  screen_name: "longScreenName1,longerScreeName2,...,veryLongScreenName100"
 });
 ```
 
@@ -251,9 +247,7 @@ See the [OAuth example](#oauth-authentication).
 
 ### API errors
 
-**Breaking change in v0.7**
-
-Given that [developers expect promises to reject when they don't return the requested data](https://github.com/ttezel/twit/issues/256), `.get` and `.post` now reject instead of silently returning API errors as an array under the `errors` key of the response object. You can use try/catch to handle errors. The error object contains an `errors` property with the error `code` and `message`, and a `_headers` property with the the HTTP response code and [Headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html) object returned by the Twitter API. Note that each `_headers` property is an array, usually of length 1.
+`.get` and `.post` reject on error, so you can use try/catch to handle errors. The error object contains an `errors` property with the error `code` and `message`, and a `_headers` property with the the HTTP response code and [Headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html) object returned by the Twitter API. Note that each `_headers` property is an array, usually of length 1.
 
 ```es6
 try {
@@ -309,13 +303,13 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
 
 Authors:
 
-- [@peterpme](https://github.com/peterpme)
 - [@dandv](https://github.com/dandv)
+- [@peterpme](https://github.com/peterpme)
 
 Over the years, thanks to:
 
+- [@ttezel](https://github.com/ttezel)
 - [@technoweenie](http://github.com/technoweenie)
 - [@jdub](http://github.com/jdub)
 - [@desmondmorris](http://github.com/desmondmorris)
-- [@ttezel](https://github.com/ttezel)
 - [Node Twitter Community](https://github.com/desmondmorris/node-twitter/graphs/contributors)

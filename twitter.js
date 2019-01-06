@@ -197,6 +197,13 @@ class Twitter {
     };
   }
 
+  /**
+   * Send a GET request
+   * @param {string} resource - endpoint, e.g. `followers/ids`
+   * @param {object} parameters
+   * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
+   *   The `_header` property will be set to the Response headers (useful for checking rate limits)
+   */
   get(resource, parameters) {
     const { requestData, headers } = this._makeRequest(
       "GET",
@@ -211,18 +218,26 @@ class Twitter {
       );
   }
 
-  post(resource, body, parameters) {
+  /**
+   * Send a POST request
+   * @param {string} resource - endpoint, e.g. `users/lookup`
+   * @param {object} body - POST parameters object.
+   *   Will be encoded appropriately (JSON or urlencoded) based on the resource
+   * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
+   *   The `_header` property will be set to the Response headers (useful for checking rate limits)
+   */
+  post(resource, body) {
     const { requestData, headers } = this._makeRequest(
       "POST",
       resource,
-      parameters
+      JSON_ENDPOINTS.includes(resource) ? null : body // don't sign JSON bodies; only parameters
     );
 
     const postHeaders = Object.assign({}, baseHeaders, headers);
     if (JSON_ENDPOINTS.includes(resource)) {
       body = JSON.stringify(body);
     } else {
-      body = querystring.stringify(parameters);
+      body = querystring.stringify(body);
       postHeaders["Content-Type"] = "application/x-www-form-urlencoded";
     }
 
@@ -237,6 +252,12 @@ class Twitter {
       );
   }
 
+  /**
+   *
+   * @param {string} resource - endpoint, e.g. `statuses/filter`
+   * @param {object} parameters
+   * @returns {Stream}
+   */
   stream(resource, parameters) {
     if (this.authType !== "User")
       throw new Error("Streams require user context authentication");

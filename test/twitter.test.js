@@ -188,7 +188,7 @@ describe("posting", () => {
     const allTheCharacters = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
 
     // https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
-    const response = await client.post("statuses/update", null, {
+    const response = await client.post("statuses/update", {
       status: allTheCharacters + message + allTheCharacters
     });
 
@@ -196,7 +196,7 @@ describe("posting", () => {
       text: htmlEscape(allTheCharacters + message + allTheCharacters)
     });
     const id = response.id_str;
-    const deleted = await client.post("statuses/destroy", null, {
+    const deleted = await client.post("statuses/destroy", {
       id
     });
     expect(deleted).toMatchObject({
@@ -243,7 +243,7 @@ describe("misc", () => {
 
   it("should follow user", async () => {
     // This is counter-intuitive - see https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433
-    const response = await client.post("friendships/create", null, {
+    const response = await client.post("friendships/create", {
       screen_name: "mdo"
     });
     expect(response).toMatchObject({
@@ -253,7 +253,7 @@ describe("misc", () => {
 
   it("should unfollow user", async () => {
     // This is counter-intuitive - see above
-    const response = await client.post("friendships/destroy", null, {
+    const response = await client.post("friendships/destroy", {
       user_id: "15008676"
     });
     expect(response).toMatchObject({
@@ -271,7 +271,7 @@ describe("misc", () => {
       { id_str: "711030662728437760" }
     ];
     // Use POST per https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
-    const usersPost = await client.post("users/lookup", null, {
+    const usersPost = await client.post("users/lookup", {
       user_id: userIds
     });
     delete usersPost._headers; // to not confuse Jest - https://github.com/facebook/jest/issues/5998#issuecomment-446827454
