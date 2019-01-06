@@ -175,6 +175,14 @@ describe("posting", () => {
     });
   });
 
+  it("should send typing indicator and parse empty response", async () => {
+    // https://developer.twitter.com/en/docs/direct-messages/typing-indicator-and-read-receipts/api-reference/new-typing-indicator
+    const response = await client.post("direct_messages/indicate_typing", {
+      recipient_id: "50426068"
+    });
+    expect(response).toEqual({ _headers: expect.any(Object) });
+  });
+
   it("should post status update with escaped characters, then delete it", async () => {
     const message = randomString(); // prevent overzealous abuse detection
     const allTheCharacters = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";

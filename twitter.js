@@ -76,13 +76,19 @@ class Twitter {
   }
 
   /**
-   * Parse the JSON from a Response object and add the Headers under _headers
+   * Parse the JSON from a Response object and add the Headers under `_headers`
    * @param {Response} response - the Response object returned by Fetch
-   * @return {Promise<Object>}
+   * @return {Promise<object>}
    * @private
    */
   static _handleResponse(response) {
     const headers = response.headers.raw(); // https://github.com/bitinn/node-fetch/issues/495
+    // Return empty response on 204 "No content"
+    if (response.status === 204)
+      return {
+        _headers: headers
+      };
+    // Otherwise, parse JSON response
     return response.json().then(res => {
       res._headers = headers; // TODO: this creates an array-like object when it adds _headers to an array response
       return res;
