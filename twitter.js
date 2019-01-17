@@ -237,14 +237,14 @@ class Twitter {
     if (JSON_ENDPOINTS.includes(resource)) {
       body = JSON.stringify(body);
     } else {
-      body = querystring.stringify(body);
+      body = percentEncode(querystring.stringify(body));
       postHeaders["Content-Type"] = "application/x-www-form-urlencoded";
     }
 
     return Fetch(requestData.url, {
       method: "POST",
       headers: postHeaders,
-      body: percentEncode(body)
+      body
     })
       .then(Twitter._handleResponse)
       .then(results =>

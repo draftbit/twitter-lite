@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A tiny, full-featured client / server library for the Twitter API",
   "source": [
     "twitter.js",
