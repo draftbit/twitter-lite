@@ -243,6 +243,10 @@ See the [OAuth example](#oauth-authentication).
 
 See the [OAuth example](#oauth-authentication).
 
+## Examples
+
+You can find many more examples for various resources/endpoints in [the tests](test).
+
 ## Troubleshooting
 
 ### API errors

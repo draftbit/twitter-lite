@@ -297,4 +297,12 @@ describe("misc", () => {
       });
     }
   });
+
+  it("should get timeline", async () => {
+    const response = await client.get("statuses/user_timeline", {
+      screen_name: "twitterapi",
+      count: 2
+    });
+    expect(response).toHaveLength(2);
+  });
 });
