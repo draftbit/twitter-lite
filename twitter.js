@@ -17,7 +17,7 @@ const createOauthClient = ({ key, secret }) => {
         .update(baseString)
         .digest("base64");
     }
-  });
+  })
 
   return client;
 };
@@ -250,6 +250,42 @@ class Twitter {
       .then(results =>
         "errors" in results ? Promise.reject(results) : results
       );
+  }
+
+  /**
+   * Sends a PUT request
+   * @param {string} resource - endpoint request is being sent to, e.g. `account_activity/webhooks`
+   * @param {object} body - PUT parameters object.
+   *   Will be encoded appropriately (JSON or urlencoded) based on the resource
+   * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
+   *   The `_header` property will be set to the Response headers (useful for checking rate limits)
+   */
+  put(resource, body) {
+    const { requestData, headers } = this._makeRequest(
+      "PUT",
+      resource,
+      JSON_ENDPOINTS.includes(resource) ? null : body // don't sign JSON bodies; only parameters
+    );
+
+    const putHeaders = Object.assign({}, baseHeaders, headers);
+
+    if (JSON_ENDPOINTS.includes(resource)) {
+      body = JSON.stringify(body);
+    } else {
+      body = querystring.stringify(body);
+      putHeaders["Content-Type"] = "application/x-www-form-urlencoded";
+    }
+
+    return Fetch(requestData.url, {
+      method: "PUT",
+      headers: putHeaders,
+      body: percentEncode(body)
+    })
+      .then(Twitter._handleResponse)
+      .then(results =>
+        "errors" in results ? Promise.reject(results) : results
+      );
+
   }
 
   /**
