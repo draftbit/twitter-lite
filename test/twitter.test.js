@@ -8,6 +8,8 @@ const {
   ACCESS_TOKEN_SECRET
 } = process.env;
 
+const allTheCharacters = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/? ✓";
+
 function newClient(subdomain = "api") {
   return new Twitter({
     subdomain,
@@ -144,7 +146,7 @@ describe("posting", () => {
   let client;
   beforeAll(() => (client = newClient()));
 
-  it("should DM user", async () => {
+  it("should DM user, including special characters", async () => {
     const message = randomString(); // prevent overzealous abuse detection
 
     // POST with JSON body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event
@@ -156,7 +158,9 @@ describe("posting", () => {
             recipient_id: "50426068"
           },
           message_data: {
-            text: message
+            text: message + allTheCharacters
+            // https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event#message-data-object
+            // says "URL encode as necessary", but applying encodeURIComponent results in verbatim %NN being sent
           }
         }
       }
@@ -168,7 +172,7 @@ describe("posting", () => {
         created_timestamp: expect.any(String),
         message_create: {
           message_data: {
-            text: message
+            text: htmlEscape(message + allTheCharacters)
           }
         }
       }
@@ -185,7 +189,6 @@ describe("posting", () => {
 
   it("should post status update with escaped characters, then delete it", async () => {
     const message = randomString(); // prevent overzealous abuse detection
-    const allTheCharacters = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?";
 
     // https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
     const response = await client.post("statuses/update", {
@@ -293,5 +296,13 @@ describe("misc", () => {
         errors: [{ code: 17, message: "No user matches for specified terms." }]
       });
     }
+  });
+
+  it("should get timeline", async () => {
+    const response = await client.get("statuses/user_timeline", {
+      screen_name: "twitterapi",
+      count: 2
+    });
+    expect(response).toHaveLength(2);
   });
 });
