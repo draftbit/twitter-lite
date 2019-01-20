@@ -17,7 +17,7 @@ const createOauthClient = ({ key, secret }) => {
         .update(baseString)
         .digest("base64");
     }
-  })
+  });
 
   return client;
 };
