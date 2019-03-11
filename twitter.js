@@ -200,7 +200,7 @@ class Twitter {
   /**
    * Send a GET request
    * @param {string} resource - endpoint, e.g. `followers/ids`
-   * @param {object} parameters
+   * @param {object} [parameters] - optional parameters
    * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
    *   The `_header` property will be set to the Response headers (useful for checking rate limits)
    */
