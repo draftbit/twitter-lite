@@ -82,8 +82,8 @@ class Twitter {
    * @private
    */
   static _handleResponse(response) {
-    const headers = response.headers.raw(); // https://github.com/bitinn/node-fetch/issues/495
-    // Return empty response on 204 'No content'
+    const headers = response.headers.raw(); // TODO: see #44
+    // Return empty response on 204 "No content"
     if (response.status === 204)
       return {
         _headers: headers,
@@ -289,13 +289,16 @@ class Twitter {
       .then(response => {
         stream.destroy = this.stream.destroy = () => response.body.destroy();
 
-        response.status === 200
-          ? stream.emit('start', response)
-          : stream.emit('error', Error(`Status Code: ${response.status}`));
+        if (response.ok) {
+          stream.emit('start', response);
+        } else {
+          response._headers = response.headers.raw();  // TODO: see #44 - could omit the line
+          stream.emit('error', response);
+        }
 
         response.body
           .on('data', chunk => stream.parse(chunk))
-          .on('error', error => stream.emit('error', error))
+          .on('error', error => stream.emit('error', error))  // no point in adding the original response headers
           .on('end', () => stream.emit('end', response));
       })
       .catch(error => stream.emit('error', error));

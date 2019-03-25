@@ -139,7 +139,7 @@ describe('rate limits', () => {
       expect(e.errors[0]).toHaveProperty('code', 88); // Rate limit exceeded
       expect(e._headers).toHaveProperty('x-rate-limit-remaining', ['0']);
     }
-  });
+  }, 10 * 1000);
 });
 
 describe('posting', () => {
@@ -160,7 +160,7 @@ describe('posting', () => {
           message_data: {
             text: message + allTheCharacters,
             // https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event#message-data-object
-            // says 'URL encode as necessary', but applying encodeURIComponent results in verbatim %NN being sent
+            // says "URL encode as necessary", but applying encodeURIComponent results in verbatim %NN being sent
           },
         },
       },
@@ -221,7 +221,7 @@ describe('misc', () => {
     expect(response.retweeted_status.full_text).toEqual(
       '@jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income exceeds your burn rate, or when you can make a living doing what you love.'
     );
-    // For the retwee, 'truncated' comes misleadingly set to 'false' from the API, and the 'full_text' is limited to 140 chars
+    // For the retweet, "truncated" comes misleadingly set to "false" from the API, and the "full_text" is limited to 140 chars
     expect(response.truncated).toEqual(false);
     expect(response.full_text).toEqual(
       'RT @naval: @jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income…'
@@ -245,7 +245,6 @@ describe('misc', () => {
   });
 
   it('should follow user', async () => {
-    // This is counter-intuitive - see https://github.com/Preposterous/twitter-lite/issues/15#issuecomment-402902433
     const response = await client.post('friendships/create', {
       screen_name: 'mdo',
     });
@@ -255,7 +254,6 @@ describe('misc', () => {
   });
 
   it('should unfollow user', async () => {
-    // This is counter-intuitive - see above
     const response = await client.post('friendships/destroy', {
       user_id: '15008676',
     });

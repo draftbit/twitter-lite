@@ -4,6 +4,7 @@ A tiny, full-featured, modern client / server library for the [Twitter API](http
 
 [![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/draftbit/twitter-lite.svg?branch=master)](https://travis-ci.org/draftbit/twitter-lite)
 
+
 ## Features
 
 - Promise driven via Async / Await
@@ -14,9 +15,11 @@ A tiny, full-featured, modern client / server library for the [Twitter API](http
 - Minimal dependencies
 - Test suite
 
+
 ## Why
 
 We have built this library because existing ones [have not been recently maintained](https://github.com/desmondmorris/node-twitter), or depend on [outdated](https://github.com/ttezel/twit/issues/411) [libraries](https://github.com/ttezel/twit/issues/412).
+
 
 ## Installation
 
@@ -27,6 +30,7 @@ yarn add twitter-lite
 ```sh
 npm install twitter-lite
 ```
+
 
 ## Usage
 
@@ -147,6 +151,7 @@ client
 
 And this will return you your `access_token` and `access_token_secret`.
 
+
 ## Streams
 
 To learn more about the streaming API visit the [Twitter Docs](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter.html). The streaming API works only in Node.
@@ -176,14 +181,15 @@ const stream = client.stream("statuses/filter", parameters)
 process.nextTick(() => stream.destroy());  // emits "end" and "error" events
 ```
 
-To stop a stream, call `stream.destroy()`. That might take a while though, if the stream receives a lot of traffic. Also, if you attempt to destroy a stream from an `on` handler, you may get an error about writing to a destroyed stream.
-To avoid both these issues, [defer](https://stackoverflow.com/questions/49804108/write-after-end-stream-error/53878933#53878933) the `destroy()` call:
+To stop a stream, call `stream.destroy()`. That might take a while though, if the stream receives a lot of traffic. Also, if you attempt to destroy a stream from an `on` handler, you *may* get an error about writing to a destroyed stream.
+In that case, try to [defer](https://stackoverflow.com/questions/49804108/write-after-end-stream-error/53878933#53878933) the `destroy()` call:
 
 ```es6
 process.nextTick(() => stream.destroy());
 ```
 
-After you've destroyed a stream, you can create another one - see the ["should switch from one stream to another" test](https://github.com/draftbit/twitter-lite/blob/9e0845585c756aee10e8b0acaabfbc3e4f32b81c/test/stream.test.js#L131).
+After calling `stream.destroy()`, you can recreate the stream, if you wait long enough - see the "should reuse stream N times" test. Note that Twitter may return a "420 Enhance your calm" error if you switch streams too fast. There are no response headers specifying how long to wait, and [the error](https://stackoverflow.com/questions/13438965/avoid-420s-with-streaming-api), as well as [streaming limits](https://stackoverflow.com/questions/34962677/twitter-streaming-api-limits) in general, are poorly documented. Trial and error has shown that for tracked keywords, waiting 20 to 30 seconds between re-creating streams was enough.
+
 
 ## Methods
 
@@ -279,9 +285,10 @@ A particular case of errors is exceeding the [rate limits](https://developer.twi
 
 Twitter uses [numeric IDs](https://developer.twitter.com/en/docs/basics/twitter-ids.html) that in practice can be up to 18 characters long. Due to rounding errors, it's [unsafe to use numeric IDs in JavaScript](https://developer.twitter.com/en/docs/basics/things-every-developer-should-know). Always set `stringify_ids: true` when possible, so that Twitter will return strings instead of numbers, and rely on the `id_str` field, rather than on the `id` field.
 
+
 ## Contributing
 
-With the library nearing v1.0, contributions are welcome! Areas especially in need of help involve multimedia (see [#33](https://github.com/draftbit/twitter-lite/issues/33) for example), adding tests (see [these](https://github.com/ttezel/twit/tree/master/tests) for reference), and [getting v1.0 out the door](https://github.com/draftbit/twitter-lite/issues/21).
+With the library nearing v1.0, contributions are welcome! Areas especially in need of help involve multimedia (see [#33](https://github.com/draftbit/twitter-lite/issues/33) for example), and adding tests (see [these](https://github.com/ttezel/twit/tree/master/tests) for reference).
 
 ### Development
 
@@ -297,11 +304,10 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
     ```
 5.  `yarn/npm test` and make sure all tests pass
 6.  Add your contribution, along with test case(s). Note: feel free to skip the ["should DM user"](https://github.com/draftbit/twitter-lite/blob/34e8dbb3efb9a45564275f16473af59dbc4409e5/twitter.test.js#L167) test during development by changing that `it()` call to `it.skip()`, but remember to revert that change before committing. This will prevent your account from being flagged as [abusing the API to send too many DMs](https://github.com/draftbit/twitter-lite/commit/5ee2ce4232faa07453ea2f0b4d63ee7a6d119ce7).
-7.  Make sure all tests pass.
-8.  `git add` the changed files
-9.  `npm run precommit` to lint with [prettier](https://www.npmjs.com/package/prettier)
-10. Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash commits into one per fix/improvement!)
-11. `git push` and submit your PR!
+7.  Make sure all tests pass. **NOTE: tests will take over 10 minutes to finish.**
+8. Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash commits into one per fix/improvement!)
+9. `git push` and submit your PR!
+
 
 ## Credits
 

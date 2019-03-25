@@ -1,3 +1,7 @@
+# v0.9.3, 2019-Mar-25
+
+- Return `_headers` in stream creation errors as well
+
 # v0.9.1, 2019-Jan-16
 
 - Fix encoding of special characters in direct messages ([#38](https://github.com/draftbit/twitter-lite/issues/38))

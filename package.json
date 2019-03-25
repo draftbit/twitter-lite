@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "A tiny, full-featured client / server library for the Twitter API",
   "source": [
     "twitter.js",
@@ -45,9 +45,10 @@
     "microbundle": "^0.4.3"
   },
   "scripts": {
+    "lint": "eslint ./",
     "prepare": "microbundle",
-    "test": "eslint . && jest",
-    "release": "npm run -s prepare && npm test && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
+    "test": "eslint . && jest --detectOpenHandles",
+    "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "husky": {
     "hooks": {
