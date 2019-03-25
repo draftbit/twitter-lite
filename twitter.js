@@ -1,34 +1,34 @@
-const crypto = require("crypto");
-const OAuth = require("oauth-1.0a");
-const Fetch = require("cross-fetch");
-const querystring = require("querystring");
-const Stream = require("./stream");
+const crypto = require('crypto');
+const OAuth = require('oauth-1.0a');
+const Fetch = require('cross-fetch');
+const querystring = require('querystring');
+const Stream = require('./stream');
 
-const getUrl = (subdomain, endpoint = "1.1") =>
+const getUrl = (subdomain, endpoint = '1.1') =>
   `https://${subdomain}.twitter.com/${endpoint}`;
 
 const createOauthClient = ({ key, secret }) => {
   const client = OAuth({
     consumer: { key, secret },
-    signature_method: "HMAC-SHA1",
+    signature_method: 'HMAC-SHA1',
     hash_function(baseString, key) {
       return crypto
-        .createHmac("sha1", key)
+        .createHmac('sha1', key)
         .update(baseString)
-        .digest("base64");
-    }
+        .digest('base64');
+    },
   });
 
   return client;
 };
 
 const defaults = {
-  subdomain: "api",
+  subdomain: 'api',
   consumer_key: null,
   consumer_secret: null,
   access_token_key: null,
   access_token_secret: null,
-  bearer_token: null
+  bearer_token: null,
 };
 
 // Twitter expects POST body parameters to be URL-encoded: https://developer.twitter.com/en/docs/basics/authentication/guides/creating-a-signature
@@ -36,42 +36,42 @@ const defaults = {
 // It appears that JSON payloads don't need to be included in the signature,
 // because sending DMs works without signing the POST body
 const JSON_ENDPOINTS = [
-  "direct_messages/events/new",
-  "direct_messages/welcome_messages/new",
-  "direct_messages/welcome_messages/rules/new"
+  'direct_messages/events/new',
+  'direct_messages/welcome_messages/new',
+  'direct_messages/welcome_messages/rules/new',
 ];
 
 const baseHeaders = {
-  "Content-Type": "application/json",
-  Accept: "application/json"
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
 };
 
 function percentEncode(string) {
   // From OAuth.prototype.percentEncode
   return string
-    .replace(/!/g, "%21")
-    .replace(/\*/g, "%2A")
-    .replace(/'/g, "%27")
-    .replace(/\(/g, "%28")
-    .replace(/\)/g, "%29");
+    .replace(/!/g, '%21')
+    .replace(/\*/g, '%2A')
+    .replace(/'/g, '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29');
 }
 
 class Twitter {
   constructor(options) {
     const config = Object.assign({}, defaults, options);
-    this.authType = config.bearer_token ? "App" : "User";
+    this.authType = config.bearer_token ? 'App' : 'User';
     this.client = createOauthClient({
       key: config.consumer_key,
-      secret: config.consumer_secret
+      secret: config.consumer_secret,
     });
 
     this.token = {
       key: config.access_token_key,
-      secret: config.access_token_secret
+      secret: config.access_token_secret,
     };
 
     this.url = getUrl(config.subdomain);
-    this.oauth = getUrl(config.subdomain, "oauth");
+    this.oauth = getUrl(config.subdomain, 'oauth');
     this.config = config;
   }
 
@@ -83,10 +83,10 @@ class Twitter {
    */
   static _handleResponse(response) {
     const headers = response.headers.raw(); // https://github.com/bitinn/node-fetch/issues/495
-    // Return empty response on 204 "No content"
+    // Return empty response on 204 'No content'
     if (response.status === 204)
       return {
-        _headers: headers
+        _headers: headers,
       };
     // Otherwise, parse JSON response
     return response.json().then(res => {
@@ -98,17 +98,17 @@ class Twitter {
   async getBearerToken() {
     const headers = {
       Authorization:
-        "Basic " +
+        'Basic ' +
         Buffer.from(
-          this.config.consumer_key + ":" + this.config.consumer_secret
-        ).toString("base64"),
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          this.config.consumer_key + ':' + this.config.consumer_secret
+        ).toString('base64'),
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
     };
 
-    const results = await Fetch("https://api.twitter.com/oauth2/token", {
-      method: "POST",
-      body: "grant_type=client_credentials",
-      headers
+    const results = await Fetch('https://api.twitter.com/oauth2/token', {
+      method: 'POST',
+      body: 'grant_type=client_credentials',
+      headers,
     }).then(Twitter._handleResponse);
 
     return results;
@@ -117,20 +117,20 @@ class Twitter {
   async getRequestToken(twitterCallbackUrl) {
     const requestData = {
       url: `${this.oauth}/request_token`,
-      method: "POST"
+      method: 'POST',
     };
 
     let parameters = {};
     if (twitterCallbackUrl) parameters = { oauth_callback: twitterCallbackUrl };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.url += '?' + querystring.stringify(parameters);
 
     const headers = this.client.toHeader(
       this.client.authorize(requestData, {})
     );
 
     const results = await Fetch(requestData.url, {
-      method: "POST",
-      headers: Object.assign({}, baseHeaders, headers)
+      method: 'POST',
+      headers: Object.assign({}, baseHeaders, headers),
     })
       .then(res => res.text())
       .then(txt => querystring.parse(txt));
@@ -141,22 +141,22 @@ class Twitter {
   async getAccessToken(options) {
     const requestData = {
       url: `${this.oauth}/access_token`,
-      method: "POST"
+      method: 'POST',
     };
 
     let parameters = { oauth_verifier: options.verifier };
-    if (parameters) requestData.url += "?" + querystring.stringify(parameters);
+    if (parameters) requestData.url += '?' + querystring.stringify(parameters);
 
     const headers = this.client.toHeader(
       this.client.authorize(requestData, {
         key: options.key,
-        secret: options.secret
+        secret: options.secret,
       })
     );
 
     const results = await Fetch(requestData.url, {
-      method: "POST",
-      headers: Object.assign({}, baseHeaders, headers)
+      method: 'POST',
+      headers: Object.assign({}, baseHeaders, headers),
     })
       .then(res => res.text())
       .then(txt => querystring.parse(txt));
@@ -166,7 +166,7 @@ class Twitter {
 
   /**
    * Construct the data and headers for an authenticated HTTP request to the Twitter API
-   * @param {string} method - "GET" or "POST"
+   * @param {string} method - 'GET' or 'POST'
    * @param {string} resource - the API endpoint
    * @param {object} parameters
    * @return {{requestData: {url: string, method: string}, headers: ({Authorization: string}|OAuth.Header)}}
@@ -175,25 +175,25 @@ class Twitter {
   _makeRequest(method, resource, parameters) {
     const requestData = {
       url: `${this.url}/${resource}.json`,
-      method
+      method,
     };
     if (parameters)
-      if (method === "POST") requestData.data = parameters;
-      else requestData.url += "?" + querystring.stringify(parameters);
+      if (method === 'POST') requestData.data = parameters;
+      else requestData.url += '?' + querystring.stringify(parameters);
 
     let headers = {};
-    if (this.authType === "User") {
+    if (this.authType === 'User') {
       headers = this.client.toHeader(
         this.client.authorize(requestData, this.token)
       );
     } else {
       headers = {
-        Authorization: `Bearer ${this.config.bearer_token}`
+        Authorization: `Bearer ${this.config.bearer_token}`,
       };
     }
     return {
       requestData,
-      headers
+      headers,
     };
   }
 
@@ -206,7 +206,7 @@ class Twitter {
    */
   get(resource, parameters) {
     const { requestData, headers } = this._makeRequest(
-      "GET",
+      'GET',
       resource,
       parameters
     );
@@ -214,7 +214,7 @@ class Twitter {
     return Fetch(requestData.url, { headers })
       .then(Twitter._handleResponse)
       .then(results =>
-        "errors" in results ? Promise.reject(results) : results
+        'errors' in results ? Promise.reject(results) : results
       );
   }
 
@@ -228,7 +228,7 @@ class Twitter {
    */
   post(resource, body) {
     const { requestData, headers } = this._makeRequest(
-      "POST",
+      'POST',
       resource,
       JSON_ENDPOINTS.includes(resource) ? null : body // don't sign JSON bodies; only parameters
     );
@@ -238,17 +238,17 @@ class Twitter {
       body = JSON.stringify(body);
     } else {
       body = percentEncode(querystring.stringify(body));
-      postHeaders["Content-Type"] = "application/x-www-form-urlencoded";
+      postHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
     }
 
     return Fetch(requestData.url, {
-      method: "POST",
+      method: 'POST',
       headers: postHeaders,
-      body
+      body,
     })
       .then(Twitter._handleResponse)
       .then(results =>
-        "errors" in results ? Promise.reject(results) : results
+        'errors' in results ? Promise.reject(results) : results
       );
   }
 
@@ -259,16 +259,16 @@ class Twitter {
    * @returns {Stream}
    */
   stream(resource, parameters) {
-    if (this.authType !== "User")
-      throw new Error("Streams require user context authentication");
+    if (this.authType !== 'User')
+      throw new Error('Streams require user context authentication');
 
     const stream = new Stream();
 
     // POST the request, in order to accommodate long parameter lists, e.g.
     // up to 5000 ids for statuses/filter - https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
     const requestData = {
-      url: `${getUrl("stream")}/${resource}.json`,
-      method: "POST"
+      url: `${getUrl('stream')}/${resource}.json`,
+      method: 'POST',
     };
     if (parameters) requestData.data = parameters;
 
@@ -277,12 +277,12 @@ class Twitter {
     );
 
     const request = Fetch(requestData.url, {
-      method: "POST",
+      method: 'POST',
       headers: {
         ...headers,
-        "Content-Type": "application/x-www-form-urlencoded"
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: percentEncode(querystring.stringify(parameters))
+      body: percentEncode(querystring.stringify(parameters)),
     });
 
     request
@@ -290,15 +290,15 @@ class Twitter {
         stream.destroy = this.stream.destroy = () => response.body.destroy();
 
         response.status === 200
-          ? stream.emit("start", response)
-          : stream.emit("error", Error(`Status Code: ${response.status}`));
+          ? stream.emit('start', response)
+          : stream.emit('error', Error(`Status Code: ${response.status}`));
 
         response.body
-          .on("data", chunk => stream.parse(chunk))
-          .on("error", error => stream.emit("error", error))
-          .on("end", () => stream.emit("end", response));
+          .on('data', chunk => stream.parse(chunk))
+          .on('error', error => stream.emit('error', error))
+          .on('end', () => stream.emit('end', response));
       })
-      .catch(error => stream.emit("error", error));
+      .catch(error => stream.emit('error', error));
 
     return stream;
   }
