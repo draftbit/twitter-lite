@@ -188,7 +188,7 @@ In that case, try to [defer](https://stackoverflow.com/questions/49804108/write-
 process.nextTick(() => stream.destroy());
 ```
 
-After calling `stream.destroy()`, you can recreate the stream, if you wait long enough - see the "should reuse stream N times" test. Note that Twitter may return a "420 Enhance your calm" error if you switch streams too fast. There are no response headers specifying how long to wait, and [the error](https://stackoverflow.com/questions/13438965/avoid-420s-with-streaming-api), as well as [streaming limits](https://stackoverflow.com/questions/34962677/twitter-streaming-api-limits) in general, are poorly documented. Trial and error has shown that for tracked keywords, waiting 20 to 30 seconds between re-creating streams was enough.
+After calling `stream.destroy()`, you can recreate the stream, if you wait long enough - see the "should reuse stream N times" test. Note that Twitter may return a "420 Enhance your calm" error if you switch streams too fast. There are no response headers specifying how long to wait, and [the error](https://stackoverflow.com/questions/13438965/avoid-420s-with-streaming-api), as well as [streaming limits](https://stackoverflow.com/questions/34962677/twitter-streaming-api-limits) in general, are poorly documented. Trial and error has shown that for tracked keywords, waiting 20 to 30 seconds between re-creating streams was enough. Remember to also set up the `.on()` handlers again for the new stream.
 
 
 ## Methods

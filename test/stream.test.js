@@ -39,7 +39,8 @@ let stream;
 // Prolific users from https://socialblade.com/twitter/top/100/tweets that are still active.
 // Get with $('div.table-cell a').map(function () { return this.href }) then use
 // users/lookup to convert to IDs.
-const chattyUserIds = [        '63299591', '115639376', '4823945834', '2669983818', '6529402', '362413805',
+const chattyUserIds = [
+  '63299591', '115639376', '4823945834', '2669983818', '6529402', '362413805',
   '450395397', '15007299', '132355708', '561669474', '2213312341', '2050001283',
   '89142182', '2316574981', '133684052', '255409050', '15518000', '124172948',
   '225647847', '3012764258', '382430644', '42832810', '2233720891', '290395312',
@@ -71,7 +72,8 @@ function switchStream({ count, waitBetweenStreams, done, errorHandler }) {
       .on('data', tweet => {
         console.log(`Tweet from stream #${count}: ${tweet.text}`);
         stream.destroy();  // process.nextTick(() => stream.destroy());  // works too
-        if (count === N) done();
+        if (count === N)
+          done();
         else
           switchStream({
             count: count + 1,
@@ -158,7 +160,7 @@ describe('streams', () => {
     // https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
     stream = client.stream('statuses/filter', {
       follow: [
-        // First pass a ton of times an acconut that doesn't tweet often, to stress-test the POST body
+        // First pass a ton of times an account that doesn't tweet often, to stress-test the POST body
         ...Array(4900).fill('15008676'),  // @dandv
         ...chattyUserIds,
       ],

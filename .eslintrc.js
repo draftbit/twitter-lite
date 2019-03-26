@@ -22,5 +22,7 @@ module.exports = {
     semi: ['error', 'always'],
     quotes: ['warn', 'single', { avoidEscape: true }],
     'comma-dangle': ['warn', 'always-multiline'],
+    'object-curly-spacing': ['error', 'always'],
+    'no-multi-spaces': ['error', { ignoreEOLComments: true }],
   },
 };
