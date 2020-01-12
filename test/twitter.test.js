@@ -208,6 +208,39 @@ describe('posting', () => {
   });
 });
 
+describe('putting', () => {
+  let client;
+  beforeAll(() => client = newClient());
+  /**
+   * For this test you need to have opted to receive messages from anyone at https://twitter.com/settings/safety
+   * and your demo app needs to have access to read, write, and direct messages.
+   */
+  it('can update welcome message', async () => {
+    const newWelcomeMessage = await client.post('direct_messages/welcome_messages/new',
+      {
+        welcome_message: {
+          name: 'simple_welcome-message 01',
+          message_data: {
+            text: 'Welcome!',
+          },
+        },
+      },
+    );
+
+    const updatedWelcomeMessage = await client.put('direct_messages/welcome_messages/update', {
+      id: newWelcomeMessage.welcome_message.id,
+    },
+    {
+      message_data: {
+        text: 'Welcome!!!',
+      },
+    });
+
+    expect(updatedWelcomeMessage.welcome_message.message_data.text).toEqual('Welcome!!!');
+  });
+},
+);
+
 describe('misc', () => {
   let client;
   beforeAll(() => (client = newClient()));
@@ -219,12 +252,12 @@ describe('misc', () => {
     });
     // This is @naval's original tweet
     expect(response.retweeted_status.full_text).toEqual(
-      '@jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income exceeds your burn rate, or when you can make a living doing what you love.'
+      '@jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income exceeds your burn rate, or when you can make a living doing what you love.',
     );
     // For the retweet, "truncated" comes misleadingly set to "false" from the API, and the "full_text" is limited to 140 chars
     expect(response.truncated).toEqual(false);
     expect(response.full_text).toEqual(
-      'RT @naval: @jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income…'
+      'RT @naval: @jdburns4 “Retirement” occurs when you stop sacrificing today for an imagined tomorrow. You can retire when your passive income…',
     );
   });
 
@@ -304,3 +337,4 @@ describe('misc', () => {
     expect(response).toHaveLength(2);
   });
 });
+
