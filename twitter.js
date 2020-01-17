@@ -253,6 +253,34 @@ class Twitter {
   }
 
   /**
+   * Send a PUT request 
+   * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
+   * @param {object} parameters - required or optional query parameters
+   * @param {object} body - PUT request body 
+   * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
+   */
+  put(resource, parameters, body) {
+    const { requestData, headers } = this._makeRequest(
+      'PUT',
+      resource,
+      parameters
+    );
+
+    const putHeaders = Object.assign({}, baseHeaders, headers);
+    body = JSON.stringify(body);
+
+    return Fetch(requestData.url, {
+      method: 'PUT',
+      headers: putHeaders,
+      body,
+    })
+      .then(Twitter._handleResponse)
+      .then(results =>
+        'errors' in results ? Promise.reject(results) : results
+      );
+  }
+
+  /**
    *
    * @param {string} resource - endpoint, e.g. `statuses/filter`
    * @param {object} parameters

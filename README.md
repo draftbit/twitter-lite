@@ -237,6 +237,33 @@ const users = await client.post("users/lookup", {
 });
 ```
 
+### .put(endpoint, query_parameters, request_body)
+
+Same return as `.get()` and `.post()`.
+
+Use the `.put` method for actions that update state. For [example](https://developer.twitter.com/en/docs/direct-messages/welcome-messages/api-reference/update-welcome-message), to update a welcome message.
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz",
+  access_token_key: "abc",
+  access_token_secret: "abc"
+});
+
+const welcomeMessageID = "abc"  
+
+await client.put("direct_messages/welcome_messages/update", {
+  id: welcomeMessageID
+}, 
+{
+  message_data: {
+    text: "Welcome!!!"
+  }
+}
+)
+```
+
 ### .getBearerToken()
 
 See the [app authentication example](#app-authentication-example).
