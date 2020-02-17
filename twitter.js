@@ -29,6 +29,7 @@ const defaults = {
   access_token_key: null,
   access_token_secret: null,
   bearer_token: null,
+  version: '1.1',
 };
 
 // Twitter expects POST body parameters to be URL-encoded: https://developer.twitter.com/en/docs/basics/authentication/guides/creating-a-signature
@@ -70,7 +71,7 @@ class Twitter {
       secret: config.access_token_secret,
     };
 
-    this.url = getUrl(config.subdomain);
+    this.url = getUrl(config.subdomain, config.version);
     this.oauth = getUrl(config.subdomain, 'oauth');
     this.config = config;
   }
