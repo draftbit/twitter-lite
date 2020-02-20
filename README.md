@@ -71,7 +71,8 @@ You can get the bearer token by calling `.getBearerToken()`.
 
 ```es6
 const client = new Twitter({
-  subdomain: "api",
+  subdomain: "api", // "api" is the default (change for other subdomains)
+  version: "1.1", // version "1.1" is the default (change for other subdomains)
   consumer_key: "abc", // from Twitter.
   consumer_secret: "def", // from Twitter.
   access_token_key: "uvw", // from your User (oauth_token)
