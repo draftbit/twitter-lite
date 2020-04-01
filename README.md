@@ -206,7 +206,7 @@ const client = new Twitter({
   access_token_secret: "abc"
 });
 
-const rateLimits = await app.get("statuses/show", {
+const rateLimits = await client.get("statuses/show", {
   id: "1016078154497048576"
 });
 ```
