@@ -153,6 +153,36 @@ client
 And this will return you your `access_token` and `access_token_secret`.
 
 
+
+### Tweeting a thread
+
+- [statuses/update documentation](https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update)
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz",
+  access_token_key: "xyz",
+  access_token_secret: "xyz"
+});
+
+async function tweetThread (thread) {
+  let lastTweetID = '';
+  for (const status of thread) {
+    const tweet = await client
+      .post("statuses/update", {
+        status: status,
+        in_reply_to_status_id: lastTweetID,
+        auto_populate_reply_metadata: true
+      });
+    lastTweetID = tweet.id_str;
+  }
+}
+
+const thread  = ['First tweet', 'Second tweet', 'Third tweet'];
+tweetThread(thread).catch(console.error);
+```
+
 ## Streams
 
 To learn more about the streaming API visit the [Twitter Docs](https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter.html). The streaming API works only in Node.
