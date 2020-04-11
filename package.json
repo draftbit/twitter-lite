@@ -15,11 +15,6 @@
     "Dan Dascalescu (https://github.com/dandv)"
   ],
   "license": "MIT",
-  "files": [
-    "twitter.js",
-    "stream.js",
-    "dist"
-  ],
   "keywords": [
     "twitter",
     "rest",
@@ -42,11 +37,11 @@
     "flow-bin": "^0.68.0",
     "husky": "^1.3.1",
     "jest": "^23.6.0",
-    "microbundle": "^0.4.3"
+    "microbundle": "^0.11.0"
   },
   "scripts": {
     "lint": "eslint ./",
-    "prepare": "microbundle",
+    "prepare": "microbundle {stream,twitter}.js",
     "test": "eslint . && jest --detectOpenHandles",
     "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
