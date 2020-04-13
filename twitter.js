@@ -96,7 +96,7 @@ class Twitter {
         return res;
       });
     } else {
-      throw await response.json();
+      return Promise.reject(await response.json());
     }
   }
 
@@ -104,7 +104,7 @@ class Twitter {
    * Resolve the TEXT parsed from the successful response or reject the JSON from the error
    * @param {Response} response - the Response object returned by Fetch
    * @return {Promise<object>}
-   * @throws {object}
+   * @throws {Promise<object>}
    * @private
    */
   static async _handleResponseTextOrJson(response) {
@@ -120,7 +120,7 @@ class Twitter {
         // it is not a json
         error = body;
       }
-      throw new Error(error);
+      return Promise.reject(error);
     }
   }
 
