@@ -96,7 +96,7 @@ class Twitter {
         return res;
       });
     } else {
-      return Promise.reject(await response.json());
+      throw await response.json();
     }
   }
 
