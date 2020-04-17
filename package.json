@@ -17,12 +17,6 @@
     "Dan Dascalescu (https://github.com/dandv)"
   ],
   "license": "MIT",
-  "files": [
-    "twitter.js",
-    "stream.js",
-    "dist",
-    "index.d.ts"
-  ],
   "keywords": [
     "twitter",
     "rest",
@@ -51,7 +45,7 @@
   },
   "scripts": {
     "lint": "eslint ./",
-    "prepare": "microbundle",
+    "prepare": "microbundle --entry twitter.js",
     "test": "eslint . && jest --detectOpenHandles",
     "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
