@@ -2,11 +2,7 @@
   "name": "twitter-lite",
   "version": "0.9.4",
   "description": "Tiny, full-featured client/server REST/stream library for the Twitter API",
-  "source": [
-    "twitter.js",
-    "stream.js",
-    "index.d.ts"
-  ],
+  "source": "twitter.js",
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
   "types": "dist/index.d.ts",
@@ -45,7 +41,7 @@
   },
   "scripts": {
     "lint": "eslint ./",
-    "prepare": "microbundle --entry twitter.js",
+    "prepare": "microbundle && cp index.d.ts dist/",
     "test": "eslint . && jest --detectOpenHandles",
     "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
