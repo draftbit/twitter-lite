@@ -4,22 +4,20 @@ A tiny, full-featured, modern client / server library for the [Twitter API](http
 
 [![npm](https://img.shields.io/npm/v/twitter-lite.svg)](https://npm.im/twitter-lite) [![travis](https://travis-ci.org/draftbit/twitter-lite.svg?branch=master)](https://travis-ci.org/draftbit/twitter-lite)
 
-
 ## Features
 
 - Promise driven via Async / Await
 - REST and Stream support
+- [Typescript support](https://github.com/draftbit/twitter-lite/blob/master/index.d.ts)
 - Works both in Node and in browsers
 - Rate limiting support
 - Under 1kb
 - Minimal dependencies
 - Test suite
 
-
 ## Why
 
 We have built this library because existing ones [have not been recently maintained](https://github.com/desmondmorris/node-twitter), or depend on [outdated](https://github.com/ttezel/twit/issues/411) [libraries](https://github.com/ttezel/twit/issues/412).
-
 
 ## Installation
 
@@ -30,7 +28,6 @@ yarn add twitter-lite
 ```sh
 npm install twitter-lite
 ```
-
 
 ## Usage
 
@@ -152,8 +149,6 @@ client
 
 And this will return you your `access_token` and `access_token_secret`.
 
-
-
 ### Tweeting a thread
 
 - [statuses/update documentation](https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update)
@@ -166,20 +161,19 @@ const client = new Twitter({
   access_token_secret: "xyz"
 });
 
-async function tweetThread (thread) {
-  let lastTweetID = '';
+async function tweetThread(thread) {
+  let lastTweetID = "";
   for (const status of thread) {
-    const tweet = await client
-      .post("statuses/update", {
-        status: status,
-        in_reply_to_status_id: lastTweetID,
-        auto_populate_reply_metadata: true
-      });
+    const tweet = await client.post("statuses/update", {
+      status: status,
+      in_reply_to_status_id: lastTweetID,
+      auto_populate_reply_metadata: true
+    });
     lastTweetID = tweet.id_str;
   }
 }
 
-const thread  = ['First tweet', 'Second tweet', 'Third tweet'];
+const thread = ["First tweet", "Second tweet", "Third tweet"];
 tweetThread(thread).catch(console.error);
 ```
 
@@ -212,7 +206,7 @@ const stream = client.stream("statuses/filter", parameters)
 process.nextTick(() => stream.destroy());  // emits "end" and "error" events
 ```
 
-To stop a stream, call `stream.destroy()`. That might take a while though, if the stream receives a lot of traffic. Also, if you attempt to destroy a stream from an `on` handler, you *may* get an error about writing to a destroyed stream.
+To stop a stream, call `stream.destroy()`. That might take a while though, if the stream receives a lot of traffic. Also, if you attempt to destroy a stream from an `on` handler, you _may_ get an error about writing to a destroyed stream.
 In that case, try to [defer](https://stackoverflow.com/questions/49804108/write-after-end-stream-error/53878933#53878933) the `destroy()` call:
 
 ```es6
@@ -220,7 +214,6 @@ process.nextTick(() => stream.destroy());
 ```
 
 After calling `stream.destroy()`, you can recreate the stream, if you wait long enough - see the "should reuse stream N times" test. Note that Twitter may return a "420 Enhance your calm" error if you switch streams too fast. There are no response headers specifying how long to wait, and [the error](https://stackoverflow.com/questions/13438965/avoid-420s-with-streaming-api), as well as [streaming limits](https://stackoverflow.com/questions/34962677/twitter-streaming-api-limits) in general, are poorly documented. Trial and error has shown that for tracked keywords, waiting 20 to 30 seconds between re-creating streams was enough. Remember to also set up the `.on()` handlers again for the new stream.
-
 
 ## Methods
 
@@ -282,17 +275,19 @@ const client = new Twitter({
   access_token_secret: "abc"
 });
 
-const welcomeMessageID = "abc"  
+const welcomeMessageID = "abc";
 
-await client.put("direct_messages/welcome_messages/update", {
-  id: welcomeMessageID
-}, 
-{
-  message_data: {
-    text: "Welcome!!!"
+await client.put(
+  "direct_messages/welcome_messages/update",
+  {
+    id: welcomeMessageID
+  },
+  {
+    message_data: {
+      text: "Welcome!!!"
+    }
   }
-}
-)
+);
 ```
 
 ### .getBearerToken()
@@ -343,7 +338,6 @@ A particular case of errors is exceeding the [rate limits](https://developer.twi
 
 Twitter uses [numeric IDs](https://developer.twitter.com/en/docs/basics/twitter-ids.html) that in practice can be up to 18 characters long. Due to rounding errors, it's [unsafe to use numeric IDs in JavaScript](https://developer.twitter.com/en/docs/basics/things-every-developer-should-know). Always set `stringify_ids: true` when possible, so that Twitter will return strings instead of numbers, and rely on the `id_str` field, rather than on the `id` field.
 
-
 ## Contributing
 
 With the library nearing v1.0, contributions are welcome! Areas especially in need of help involve multimedia (see [#33](https://github.com/draftbit/twitter-lite/issues/33) for example), and adding tests (see [these](https://github.com/ttezel/twit/tree/master/tests) for reference).
@@ -363,9 +357,8 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
 5.  `yarn/npm test` and make sure all tests pass
 6.  Add your contribution, along with test case(s). Note: feel free to skip the ["should DM user"](https://github.com/draftbit/twitter-lite/blob/34e8dbb3efb9a45564275f16473af59dbc4409e5/twitter.test.js#L167) test during development by changing that `it()` call to `it.skip()`, but remember to revert that change before committing. This will prevent your account from being flagged as [abusing the API to send too many DMs](https://github.com/draftbit/twitter-lite/commit/5ee2ce4232faa07453ea2f0b4d63ee7a6d119ce7).
 7.  Make sure all tests pass. **NOTE: tests will take over 10 minutes to finish.**
-8. Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash commits into one per fix/improvement!)
-9. `git push` and submit your PR!
-
+8.  Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash commits into one per fix/improvement!)
+9.  `git push` and submit your PR!
 
 ## Credits
 
@@ -380,4 +373,7 @@ Over the years, thanks to:
 - [@technoweenie](http://github.com/technoweenie)
 - [@jdub](http://github.com/jdub)
 - [@desmondmorris](http://github.com/desmondmorris)
-- [Node Twitter Community](https://github.com/desmondmorris/node-twitter/graphs/contributors)
+- [Node Twitter
+  Community](https://github.com/desmondmorris/node-twitter/graphs/contributors)
+- [@dylanirlbeck](https://github.com/dylanirlbeck)
+- [@Fdebijl](https://github.com/Fdebijl) - Typescript support
