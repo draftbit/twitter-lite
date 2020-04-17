@@ -87,33 +87,37 @@ declare namespace TwitterLite {
   
     /**
      * Send a GET request
+     * @type {T} Expected response from this request, generally `object` or `array`.
      * @param {string} resource - endpoint, e.g. `followers/ids`
      * @param {object} [parameters] - optional parameters
-     * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
+     * @returns {Promise<T>} Promise resolving to the response from the Twitter API.
      *   The `_header` property will be set to the Response headers (useful for checking rate limits)
      */
-    public get(resource: string, parameters?: object): Promise<any>;
+    public get<T>(resource: string, parameters?: object): Promise<T>;
 
     /**
      * Send a POST request
+     * @type {T} Expected response from this request, generally `object` or `array`.
      * @param {string} resource - endpoint, e.g. `users/lookup`
      * @param {object} body - POST parameters object.
      *   Will be encoded appropriately (JSON or urlencoded) based on the resource
      * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
      *   The `_header` property will be set to the Response headers (useful for checking rate limits)
      */
-    public post(resource: string, body: object): Promise<any>
+    public post<T>(resource: string, body: object): Promise<T>
   
     /**
      * Send a PUT request 
+     * @type {T} Expected response from this request, generally `object` or `array`.
      * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
      * @param {object} parameters - required or optional query parameters
      * @param {object} body - PUT request body 
      * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
      */
-    public put(resource: string, parameters: object, body: object): Promise<any>
+    public put<T>(resource: string, parameters: object, body: object): Promise<T>
   
     /**
+     * Open a stream to a specified endpoint
      * 
      * @param {string} resource - endpoint, e.g. `statuses/filter`
      * @param {object} parameters
