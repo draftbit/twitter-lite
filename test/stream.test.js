@@ -29,7 +29,7 @@ function sleep(ms) {
 function pick(obj, arr) {
   return arr.reduce(
     (acc, curr) => (curr in obj && (acc[curr] = obj[curr]), acc),
-    {}
+    {},
   );
 }
 

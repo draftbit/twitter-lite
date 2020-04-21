@@ -113,7 +113,7 @@ describe('auth', () => {
     });
     // This rate limit is 75 for user auth and 300 for app auth
     expect(
-      rateLimits.resources.statuses['/statuses/retweeters/ids'].limit
+      rateLimits.resources.statuses['/statuses/retweeters/ids'].limit,
     ).toEqual(300);
   });
 });

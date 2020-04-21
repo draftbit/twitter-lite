@@ -101,7 +101,7 @@ class Twitter {
       Authorization:
         'Basic ' +
         Buffer.from(
-          this.config.consumer_key + ':' + this.config.consumer_secret
+          this.config.consumer_key + ':' + this.config.consumer_secret,
         ).toString('base64'),
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
     };
@@ -126,7 +126,7 @@ class Twitter {
     if (parameters) requestData.url += '?' + querystring.stringify(parameters);
 
     const headers = this.client.toHeader(
-      this.client.authorize(requestData, {})
+      this.client.authorize(requestData, {}),
     );
 
     const results = await Fetch(requestData.url, {
@@ -152,7 +152,7 @@ class Twitter {
       this.client.authorize(requestData, {
         key: options.key,
         secret: options.secret,
-      })
+      }),
     );
 
     const results = await Fetch(requestData.url, {
@@ -185,7 +185,7 @@ class Twitter {
     let headers = {};
     if (this.authType === 'User') {
       headers = this.client.toHeader(
-        this.client.authorize(requestData, this.token)
+        this.client.authorize(requestData, this.token),
       );
     } else {
       headers = {
@@ -209,13 +209,13 @@ class Twitter {
     const { requestData, headers } = this._makeRequest(
       'GET',
       resource,
-      parameters
+      parameters,
     );
 
     return Fetch(requestData.url, { headers })
       .then(Twitter._handleResponse)
       .then(results =>
-        'errors' in results ? Promise.reject(results) : results
+        'errors' in results ? Promise.reject(results) : results,
       );
   }
 
@@ -231,7 +231,7 @@ class Twitter {
     const { requestData, headers } = this._makeRequest(
       'POST',
       resource,
-      JSON_ENDPOINTS.includes(resource) ? null : body // don't sign JSON bodies; only parameters
+      JSON_ENDPOINTS.includes(resource) ? null : body, // don't sign JSON bodies; only parameters
     );
 
     const postHeaders = Object.assign({}, baseHeaders, headers);
@@ -249,7 +249,7 @@ class Twitter {
     })
       .then(Twitter._handleResponse)
       .then(results =>
-        'errors' in results ? Promise.reject(results) : results
+        'errors' in results ? Promise.reject(results) : results,
       );
   }
 
@@ -264,7 +264,7 @@ class Twitter {
     const { requestData, headers } = this._makeRequest(
       'PUT',
       resource,
-      parameters
+      parameters,
     );
 
     const putHeaders = Object.assign({}, baseHeaders, headers);
@@ -277,7 +277,7 @@ class Twitter {
     })
       .then(Twitter._handleResponse)
       .then(results =>
-        'errors' in results ? Promise.reject(results) : results
+        'errors' in results ? Promise.reject(results) : results,
       );
   }
 
@@ -302,7 +302,7 @@ class Twitter {
     if (parameters) requestData.data = parameters;
 
     const headers = this.client.toHeader(
-      this.client.authorize(requestData, this.token)
+      this.client.authorize(requestData, this.token),
     );
 
     const request = Fetch(requestData.url, {
