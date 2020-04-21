@@ -29,6 +29,19 @@ yarn add twitter-lite
 npm install twitter-lite
 ```
 
+Then you can include the following at the top of your code:
+
+```es6
+import Twitter from 'twitter-lite';
+
+const client = new Twitter({
+  ...
+})
+
+client.get(...)
+client.post(...)
+```
+
 ## Usage
 
 - Create an app on [https://apps.twitter.com/](https://apps.twitter.com)
