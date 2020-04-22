@@ -40,6 +40,7 @@ const JSON_ENDPOINTS = [
   'direct_messages/events/new',
   'direct_messages/welcome_messages/new',
   'direct_messages/welcome_messages/rules/new',
+  'media/metadata/create',
 ];
 
 const baseHeaders = {
@@ -84,11 +85,18 @@ class Twitter {
    */
   static _handleResponse(response) {
     const headers = response.headers.raw(); // TODO: see #44
+
     // Return empty response on 204 "No content"
     if (response.status === 204)
       return {
         _headers: headers,
       };
+
+    // Endpoint has no response, don't try to parse it
+    if (response.headers.get('content-length') === '0') return {
+      _headers: headers,
+    };
+
     // Otherwise, parse JSON response
     return response.json().then(res => {
       res._headers = headers; // TODO: this creates an array-like object when it adds _headers to an array response

@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const Twitter = require('../twitter');
 
 const {
@@ -8,7 +10,9 @@ const {
   ACCESS_TOKEN_SECRET,
 } = process.env;
 
-const allTheCharacters = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/? ✓";
+const STRING_WITH_SPECIAL_CHARS = "`!@#$%^&*()-_=+[{]}\\|;:'\",<.>/? ✓";
+const DIRECT_MESSAGE_RECIPIENT_ID = '1253003423055843328'; // https://twitter.com/twlitetest
+const TEST_IMAGE = fs.readFileSync(path.join(__dirname, 'test.gif'));
 
 function newClient(subdomain = 'api') {
   return new Twitter({
@@ -155,10 +159,10 @@ describe('posting', () => {
         type: 'message_create',
         message_create: {
           target: {
-            recipient_id: '50426068',
+            recipient_id: DIRECT_MESSAGE_RECIPIENT_ID,
           },
           message_data: {
-            text: message + allTheCharacters,
+            text: message + STRING_WITH_SPECIAL_CHARS,
             // https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event#message-data-object
             // says "URL encode as necessary", but applying encodeURIComponent results in verbatim %NN being sent
           },
@@ -172,7 +176,7 @@ describe('posting', () => {
         created_timestamp: expect.any(String),
         message_create: {
           message_data: {
-            text: htmlEscape(message + allTheCharacters),
+            text: htmlEscape(message + STRING_WITH_SPECIAL_CHARS),
           },
         },
       },
@@ -182,7 +186,7 @@ describe('posting', () => {
   it('should send typing indicator and parse empty response', async () => {
     // https://developer.twitter.com/en/docs/direct-messages/typing-indicator-and-read-receipts/api-reference/new-typing-indicator
     const response = await client.post('direct_messages/indicate_typing', {
-      recipient_id: '50426068',
+      recipient_id: DIRECT_MESSAGE_RECIPIENT_ID,
     });
     expect(response).toEqual({ _headers: expect.any(Object) });
   });
@@ -192,11 +196,11 @@ describe('posting', () => {
 
     // https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
     const response = await client.post('statuses/update', {
-      status: allTheCharacters + message + allTheCharacters,
+      status: STRING_WITH_SPECIAL_CHARS + message + STRING_WITH_SPECIAL_CHARS,
     });
 
     expect(response).toMatchObject({
-      text: htmlEscape(allTheCharacters + message + allTheCharacters),
+      text: htmlEscape(STRING_WITH_SPECIAL_CHARS + message + STRING_WITH_SPECIAL_CHARS),
     });
     const id = response.id_str;
     const deleted = await client.post('statuses/destroy', {
@@ -204,6 +208,29 @@ describe('posting', () => {
     });
     expect(deleted).toMatchObject({
       id_str: id,
+    });
+  });
+});
+
+describe('uploading', () => {
+  let uploadClient;
+  beforeAll(() => (uploadClient = newClient('upload')));
+
+  it('should upload a picture, and add alt text to it', async () => {
+    // Upload picture
+    const base64Image = new Buffer(TEST_IMAGE).toString('base64');
+    const mediaUploadResponse = await uploadClient.post('media/upload', {
+      media_data: base64Image,
+    });
+    expect(mediaUploadResponse).toMatchObject({ 
+      media_id_string: expect.any(String),
+    });
+
+    // Set alt text
+    const imageAltString = 'Animated picture of a dancing banana';
+    await uploadClient.post('media/metadata/create', { 
+      media_id: mediaUploadResponse.media_id_string,
+      alt_text: { text: imageAltString },
     });
   });
 });
