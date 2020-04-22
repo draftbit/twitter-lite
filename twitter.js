@@ -145,7 +145,7 @@ class Twitter {
       method: 'POST',
     };
 
-    let parameters = { oauth_verifier: options.verifier, oauth_token: options.oauth_token };
+    let parameters = { oauth_verifier: options.verifier };
     if (parameters) requestData.url += '?' + querystring.stringify(parameters);
 
     const headers = this.client.toHeader(
