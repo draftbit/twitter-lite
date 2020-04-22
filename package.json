@@ -6,9 +6,6 @@
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
   "repository": "draftbit/twitter-lite",
   "homepage": "https://github.com/draftbit/twitter-lite",
   "author": "Peter Piekarczyk <peter@peterp.me>",
@@ -33,7 +30,6 @@
   "devDependencies": {
     "@types/jest": "^23.3.10",
     "@types/node": "^13.7.4",
-    "bundlesize": "^0.18.0",
     "dotenv": "^6.2.0",
     "eslint": "^5.15.3",
     "eslint-plugin-jest": "^22.4.1",
@@ -45,7 +41,7 @@
   },
   "scripts": {
     "lint": "eslint ./",
-    "prepare": "microbundle && cp index.d.ts dist/ && bundlesize",
+    "prepare": "microbundle && cp index.d.ts dist/",
     "test": "eslint . && jest --detectOpenHandles",
     "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
@@ -56,15 +52,5 @@
   },
   "jest": {
     "testEnvironment": "node"
-  },
-  "bundlesize": [
-    {
-      "path": "dist/**.js",
-      "maxSize": "3 kB"
-    },
-    {
-      "path": "dist/**.ts",
-      "maxSize": "3 kB"
-    }
-  ]
+  }
 }
