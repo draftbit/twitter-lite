@@ -82,18 +82,46 @@ class Twitter {
    * @return {Promise<object>}
    * @private
    */
-  static _handleResponse(response) {
-    const headers = response.headers.raw(); // TODO: see #44
-    // Return empty response on 204 "No content"
-    if (response.status === 204)
-      return {
-        _headers: headers,
-      };
-    // Otherwise, parse JSON response
-    return response.json().then(res => {
-      res._headers = headers; // TODO: this creates an array-like object when it adds _headers to an array response
-      return res;
-    });
+  static async _handleResponse(response) {
+    if (response.ok) {
+      const headers = response.headers.raw(); // TODO: see #44
+      // Return empty response on 204 "No content"
+      if (response.status === 204)
+        return {
+          _headers: headers,
+        };
+      // Otherwise, parse JSON response
+      return response.json().then(res => {
+        res._headers = headers; // TODO: this creates an array-like object when it adds _headers to an array response
+        return res;
+      });
+    } else {
+      throw await response.json();
+    }
+  }
+
+  /**
+   * Resolve the TEXT parsed from the successful response or reject the JSON from the error
+   * @param {Response} response - the Response object returned by Fetch
+   * @return {Promise<object>}
+   * @throws {Promise<object>}
+   * @private
+   */
+  static async _handleResponseTextOrJson(response) {
+    let body = await response.text();
+    if (response.ok) {
+      return querystring.parse(body);
+    } else {
+      let error;
+      try {
+        // convert to object if it is a json
+        error = JSON.parse(body);
+      } catch (e) {
+        // it is not a json
+        error = body;
+      }
+      return Promise.reject(error);
+    }
   }
 
   async getBearerToken() {
@@ -133,8 +161,7 @@ class Twitter {
       method: 'POST',
       headers: Object.assign({}, baseHeaders, headers),
     })
-      .then(res => res.text())
-      .then(txt => querystring.parse(txt));
+      .then(Twitter._handleResponseTextOrJson);
 
     return results;
   }
@@ -159,8 +186,7 @@ class Twitter {
       method: 'POST',
       headers: Object.assign({}, baseHeaders, headers),
     })
-      .then(res => res.text())
-      .then(txt => querystring.parse(txt));
+      .then(Twitter._handleResponseTextOrJson);
 
     return results;
   }
@@ -213,10 +239,7 @@ class Twitter {
     );
 
     return Fetch(requestData.url, { headers })
-      .then(Twitter._handleResponse)
-      .then(results =>
-        'errors' in results ? Promise.reject(results) : results,
-      );
+      .then(Twitter._handleResponse);
   }
 
   /**
@@ -247,10 +270,7 @@ class Twitter {
       headers: postHeaders,
       body,
     })
-      .then(Twitter._handleResponse)
-      .then(results =>
-        'errors' in results ? Promise.reject(results) : results,
-      );
+      .then(Twitter._handleResponse);
   }
 
   /**
@@ -275,10 +295,7 @@ class Twitter {
       headers: putHeaders,
       body,
     })
-      .then(Twitter._handleResponse)
-      .then(results =>
-        'errors' in results ? Promise.reject(results) : results,
-      );
+      .then(Twitter._handleResponse);
   }
 
   /**
