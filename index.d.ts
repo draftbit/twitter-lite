@@ -46,10 +46,11 @@ declare namespace TwitterLite {
     secret: string;
   }
 
-  interface AccessTokenOptions extends KeySecret {
-    /** If using the OAuth web-flow, set these parameters to the values returned in the callback URL. If you are using out-of-band OAuth, set this value to the pin-code. */
+  interface AccessTokenOptions {
+    /** If using the OAuth web-flow, set these parameters to the values returned in the callback URL. If you are using out-of-band OAuth, set the value of oauth_verifier to the pin-code.
+     * The oauth_token here must be the same as the oauth_token returned in the request_token step.*/
     oauth_verifier: string | number;
-    oauth_token?: string;
+    oauth_token: string;
   }
 
   interface BearerResponse {
