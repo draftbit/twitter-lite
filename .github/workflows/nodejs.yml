@@ -19,7 +19,7 @@ jobs:
       - name: yarn install
         run: yarn install
       - name: lint
-        run: npm run lint
+        run: yarn lint
       - name: test
         env: # twitter keys to run tests
           TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
