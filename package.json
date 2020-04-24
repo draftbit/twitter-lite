@@ -64,7 +64,7 @@
       "maxSize": "3 kB"
     },
     {
-      "path": "dist/**.ts",
+      "path": "index.d.ts",
       "maxSize": "3 kB"
     }
   ]
