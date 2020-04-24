@@ -5,9 +5,10 @@
   "source": "twitter.js",
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
-  "types": "dist/index.d.ts",
+  "types": "index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "index.d.ts"
   ],
   "repository": "draftbit/twitter-lite",
   "homepage": "https://github.com/draftbit/twitter-lite",
@@ -45,7 +46,7 @@
   },
   "scripts": {
     "lint": "eslint ./",
-    "prepare": "microbundle {stream,twitter}.js && cp index.d.ts dist/ && bundlesize",
+    "prepare": "microbundle {stream,twitter}.js && bundlesize",
     "test": "eslint . && jest --detectOpenHandles",
     "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
