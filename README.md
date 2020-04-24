@@ -135,7 +135,7 @@ client
   .catch(console.error);
 ```
 
-Then you redirect your user to `https://api.twitter.com/oauth/authenticate?oauth_token=xyz123abc`, and once you get the verifier and the token, you pass them on to the next stage of the authentication.
+Then you redirect your user to `https://api.twitter.com/oauth/authenticate?oauth_token=xyz123abc`, and once you get the verifier and the token, you pass them on to the [next stage of the authentication](https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token).
 
 ```es6
 const client = new Twitter({
@@ -145,9 +145,8 @@ const client = new Twitter({
 
 client
   .getAccessToken({
-    key: requestToken,
-    secret: requestTokenSecret,
-    verifier: oauthVerifier
+    oauth_verifier: oauthVerifier,
+    oauth_token: oauthToken
   })
   .then(res =>
     console.log({
