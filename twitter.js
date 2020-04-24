@@ -40,6 +40,7 @@ const JSON_ENDPOINTS = [
   'direct_messages/events/new',
   'direct_messages/welcome_messages/new',
   'direct_messages/welcome_messages/rules/new',
+  'media/metadata/create',
 ];
 
 const baseHeaders = {
@@ -85,8 +86,8 @@ class Twitter {
   static async _handleResponse(response) {
     if (response.ok) {
       const headers = response.headers.raw(); // TODO: see #44
-      // Return empty response on 204 "No content"
-      if (response.status === 204)
+      // Return empty response on 204 "No content", or Content-Length=0
+      if (response.status === 204 || response.headers.get('content-length') === '0')
         return {
           _headers: headers,
         };
