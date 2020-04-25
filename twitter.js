@@ -40,6 +40,7 @@ const JSON_ENDPOINTS = [
   'direct_messages/events/new',
   'direct_messages/welcome_messages/new',
   'direct_messages/welcome_messages/rules/new',
+  'media/metadata/create',
 ];
 
 const baseHeaders = {
@@ -85,8 +86,8 @@ class Twitter {
   static async _handleResponse(response) {
     if (response.ok) {
       const headers = response.headers; // TODO: see #44
-      // Return empty response on 204 "No content"
-      if (response.status === 204)
+      // Return empty response on 204 "No content", or Content-Length=0
+      if (response.status === 204 || response.headers.get('content-length') === '0')
         return {
           _headers: headers,
         };
@@ -172,15 +173,10 @@ class Twitter {
       method: 'POST',
     };
 
-    let parameters = { oauth_verifier: options.verifier };
-    if (parameters) requestData.url += '?' + querystring.stringify(parameters);
+    let parameters = { oauth_verifier: options.oauth_verifier, oauth_token: options.oauth_token };
+    if (parameters.oauth_verifier && parameters.oauth_token) requestData.url += '?' + querystring.stringify(parameters);
 
-    const headers = this.client.toHeader(
-      this.client.authorize(requestData, {
-        key: options.key,
-        secret: options.secret,
-      }),
-    );
+    const headers = this.client.toHeader( this.client.authorize(requestData) );
 
     const results = await Fetch(requestData.url, {
       method: 'POST',
