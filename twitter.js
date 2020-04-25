@@ -85,7 +85,7 @@ class Twitter {
    */
   static async _handleResponse(response) {
     if (response.ok) {
-      const headers = response.headers.raw(); // TODO: see #44
+      const headers = response.headers; // TODO: see #44
       // Return empty response on 204 "No content", or Content-Length=0
       if (response.status === 204 || response.headers.get('content-length') === '0')
         return {
@@ -334,7 +334,7 @@ class Twitter {
         if (response.ok) {
           stream.emit('start', response);
         } else {
-          response._headers = response.headers.raw();  // TODO: see #44 - could omit the line
+          response._headers = response.headers;  // TODO: see #44 - could omit the line
           stream.emit('error', response);
         }
 
