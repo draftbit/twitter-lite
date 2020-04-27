@@ -103,7 +103,6 @@ export default class Twitter {
   public stream(resource: string, parameters: object): Stream;
 }
 
-
 interface TwitterOptions {
   /** "api" is the default (change for other subdomains) */
   subdomain?: string;
