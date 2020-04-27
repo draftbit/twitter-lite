@@ -5,7 +5,7 @@
  * @author Floris de Bijl <@fdebijl>
  * 
  * @example
- * import Twitter = require('twitter-lite');
+ * const Twitter = require('twitter-lite')
  *
  * const twitter = new Twitter({
  *  consumer_key: 'XYZ',
@@ -13,36 +13,46 @@
  *  access_token_key: 'XYZ',
  *  access_token_secret: 'XYZ'
  * });
+ * 
+ * @example
+ * // Enable esModuleInterop in your tsconfig to import typings
+ * import Twitter, { TwitterOptions } from 'twitter-lite'
  *
-*/
+ * const config: TwitterOptions = {
+ *  consumer_key: 'XYZ',
+ *  consumer_secret: 'XYZ',
+ *  access_token_key: 'XYZ',
+ *  access_token_secret: 'XYZ'
+ * };
+ *
+ * const twitter = new Twitter(config);
+ */
 
 /// <reference types="node" />
 import { EventEmitter } from 'events';
 import * as OAuth from 'oauth-1.0a';
 
-export = Twitter;
-
-declare class Twitter {
-  #authType: Twitter.AuthType;
+export default class Twitter {
+  #authType: AuthType;
   #url: string;
   #oauth: string;
-  #config: Twitter.TwitterOptions;
+  #config: TwitterOptions;
   #client: OAuth;
-  #token: Twitter.KeySecret;
+  #token: KeySecret;
 
-  constructor(options: Twitter.TwitterOptions);
+  constructor(options: TwitterOptions);
 
   /**
    * Parse the JSON from a Response object and add the Headers under `_headers`
    */
   private static _handleResponse(response: Response): Promise<object>;
 
-  getBearerToken(): Promise<Twitter.BearerResponse>;
+  getBearerToken(): Promise<BearerResponse>;
 
   /** The value you specify here will be used as the URL a user is redirected to should they approve your application's access to their account. Set this to oob for out-of-band pin mode. */
-  getRequestToken(twitterCallbackUrl: string | 'oob'): Promise<Twitter.TokenResponse>;
+  getRequestToken(twitterCallbackUrl: string | 'oob'): Promise<TokenResponse>;
 
-  getAccessToken(options: Twitter.AccessTokenOptions): Promise<Twitter.AccessTokenResponse>;
+  getAccessToken(options: AccessTokenOptions): Promise<AccessTokenResponse>;
 
   /**
    * Construct the data and headers for an authenticated HTTP request to the Twitter API
@@ -90,59 +100,58 @@ declare class Twitter {
    * @param {object} parameters
    * @returns {Stream}
    */
-  public stream(resource: string, parameters: object): Twitter.Stream;
+  public stream(resource: string, parameters: object): Stream;
 }
 
-declare namespace Twitter {  
-  interface TwitterOptions {
-    /** "api" is the default (change for other subdomains) */
-    subdomain?: string;
-    /** version "1.1" is the default (change for other subdomains) */
-    version?: string;
-    /** consumer key from Twitter. */
-    consumer_key: string;
-    /** consumer secret from Twitter */
-    consumer_secret: string;
-    /** access token key from your User (oauth_token) */
-    access_token_key?: OauthToken;
-    /** access token secret from your User (oauth_token_secret) */
-    access_token_secret?: OauthTokenSecret;
-  }
-  
-  type OauthToken = string;
-  type OauthTokenSecret = string;
-  type AuthType = 'App' | 'User';
-  
-  interface KeySecret {
-    key: string;
-    secret: string;
-  }
 
-  interface AccessTokenOptions {
-    /** If using the OAuth web-flow, set these parameters to the values returned in the callback URL. If you are using out-of-band OAuth, set the value of oauth_verifier to the pin-code.
-     * The oauth_token here must be the same as the oauth_token returned in the request_token step.*/
-    oauth_verifier: string | number;
-    oauth_token: string;
-  }
-
-  interface BearerResponse {
-    token_type: 'bearer';
-    access_token: string;
-  }
-
-  interface TokenResponse {
-    oauth_token: OauthToken;
-    oauth_token_secret: OauthTokenSecret;
-  }
-  
-  interface AccessTokenResponse extends TokenResponse {
-    user_id: number;
-    screen_name: string;
-  }
-    
-  class Stream extends EventEmitter {
-    constructor();
-  
-    parse(buffer: Buffer): void;
-  } 
+interface TwitterOptions {
+  /** "api" is the default (change for other subdomains) */
+  subdomain?: string;
+  /** version "1.1" is the default (change for other subdomains) */
+  version?: string;
+  /** consumer key from Twitter. */
+  consumer_key: string;
+  /** consumer secret from Twitter */
+  consumer_secret: string;
+  /** access token key from your User (oauth_token) */
+  access_token_key?: OauthToken;
+  /** access token secret from your User (oauth_token_secret) */
+  access_token_secret?: OauthTokenSecret;
 }
+
+type OauthToken = string;
+type OauthTokenSecret = string;
+type AuthType = 'App' | 'User';
+
+interface KeySecret {
+  key: string;
+  secret: string;
+}
+
+interface AccessTokenOptions {
+  /** If using the OAuth web-flow, set these parameters to the values returned in the callback URL. If you are using out-of-band OAuth, set the value of oauth_verifier to the pin-code.
+   * The oauth_token here must be the same as the oauth_token returned in the request_token step.*/
+  oauth_verifier: string | number;
+  oauth_token: string;
+}
+
+interface BearerResponse {
+  token_type: 'bearer';
+  access_token: string;
+}
+
+interface TokenResponse {
+  oauth_token: OauthToken;
+  oauth_token_secret: OauthTokenSecret;
+}
+
+interface AccessTokenResponse extends TokenResponse {
+  user_id: number;
+  screen_name: string;
+}
+  
+declare class Stream extends EventEmitter {
+  constructor();
+
+  parse(buffer: Buffer): void;
+} 
