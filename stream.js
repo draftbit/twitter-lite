@@ -1,15 +1,15 @@
-const EventEmitter = require('events');
-const END = '\r\n';
+const EventEmitter = require("events");
+const END = "\r\n";
 const END_LENGTH = 2;
 
 class Stream extends EventEmitter {
   constructor() {
     super();
-    this.buffer = '';
+    this.buffer = "";
   }
 
   parse(buffer) {
-    this.buffer += buffer.toString('utf8');
+    this.buffer += buffer.toString("utf8");
     let index;
     let json;
 
@@ -19,13 +19,13 @@ class Stream extends EventEmitter {
       if (json.length > 0) {
         try {
           json = JSON.parse(json);
-          this.emit(json.event || 'data', json);
+          this.emit(json.event || "data", json);
         } catch (error) {
           error.source = json;
-          this.emit('error', error);
+          this.emit("error", error);
         }
       } else {
-        this.emit('ping');
+        this.emit("ping");
       }
     }
   }
