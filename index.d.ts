@@ -1,9 +1,9 @@
-/**
- * Typings for twitter-lite
- *
+/** 
+ * Typings for twitter-lite 
+ * 
  * @version 0.10-1.0
  * @author Floris de Bijl <@fdebijl>
- *
+ * 
  * @example
  * const Twitter = require('twitter-lite')
  *
@@ -13,7 +13,7 @@
  *  access_token_key: 'XYZ',
  *  access_token_secret: 'XYZ'
  * });
- *
+ * 
  * @example
  * // Enable esModuleInterop in your tsconfig to import typings
  * import Twitter, { TwitterOptions } from 'twitter-lite'
@@ -29,8 +29,8 @@
  */
 
 /// <reference types="node" />
-import { EventEmitter } from "events";
-import * as OAuth from "oauth-1.0a";
+import { EventEmitter } from 'events';
+import * as OAuth from 'oauth-1.0a';
 
 export default class Twitter {
   #authType: AuthType;
@@ -50,7 +50,7 @@ export default class Twitter {
   getBearerToken(): Promise<BearerResponse>;
 
   /** The value you specify here will be used as the URL a user is redirected to should they approve your application's access to their account. Set this to oob for out-of-band pin mode. */
-  getRequestToken(twitterCallbackUrl: string | "oob"): Promise<TokenResponse>;
+  getRequestToken(twitterCallbackUrl: string | 'oob'): Promise<TokenResponse>;
 
   getAccessToken(options: AccessTokenOptions): Promise<AccessTokenResponse>;
 
@@ -59,14 +59,8 @@ export default class Twitter {
    * @param {'GET | 'POST' | 'PUT'}
    * @param {string} resource - the API endpoint
    */
-  private _makeRequest(
-    method: "GET" | "POST" | "PUT",
-    resource: string,
-    parameters: object
-  ): {
-    requestData: { url: string; method: string };
-    headers: { Authorization: string } | OAuth.Header;
-  };
+  private _makeRequest(method: 'GET' | 'POST' | 'PUT', resource: string, parameters: object): { requestData: { url: string; method: string; }; headers: ({ Authorization: string; } | OAuth.Header); };
+
 
   /**
    * Send a GET request
@@ -87,25 +81,21 @@ export default class Twitter {
    * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
    *   The `_header` property will be set to the Response headers (useful for checking rate limits)
    */
-  public post<T = any>(resource: string, body: object): Promise<T>;
+  public post<T = any>(resource: string, body: object): Promise<T>
 
   /**
-   * Send a PUT request
+   * Send a PUT request 
    * @type {T = any} Expected type for the response from this request, generally `object` or `array`.
    * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
    * @param {object} parameters - required or optional query parameters
-   * @param {object} body - PUT request body
+   * @param {object} body - PUT request body 
    * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
    */
-  public put<T = any>(
-    resource: string,
-    parameters: object,
-    body: object
-  ): Promise<T>;
+  public put<T = any>(resource: string, parameters: object, body: object): Promise<T>
 
   /**
    * Open a stream to a specified endpoint
-   *
+   * 
    * @param {string} resource - endpoint, e.g. `statuses/filter`
    * @param {object} parameters
    * @returns {Stream}
@@ -130,7 +120,7 @@ interface TwitterOptions {
 
 type OauthToken = string;
 type OauthTokenSecret = string;
-type AuthType = "App" | "User";
+type AuthType = 'App' | 'User';
 
 interface KeySecret {
   key: string;
@@ -145,7 +135,7 @@ interface AccessTokenOptions {
 }
 
 interface BearerResponse {
-  token_type: "bearer";
+  token_type: 'bearer';
   access_token: string;
 }
 
@@ -158,9 +148,9 @@ interface AccessTokenResponse extends TokenResponse {
   user_id: number;
   screen_name: string;
 }
-
+  
 declare class Stream extends EventEmitter {
   constructor();
 
   parse(buffer: Buffer): void;
-}
+} 
