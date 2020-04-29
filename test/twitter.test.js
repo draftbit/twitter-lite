@@ -26,9 +26,7 @@ function newClient(subdomain = 'api') {
 
 // Used when testing DMs to avoid getting flagged for abuse
 function randomString() {
-  return Math.random()
-    .toString(36)
-    .substr(2, 11);
+  return Math.random().toString(36).substr(2, 11);
 }
 
 function htmlEscape(string) {
@@ -126,24 +124,28 @@ describe('rate limits', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
-  it('should get rate limited', async () => {
-    expect.assertions(2); // assume we were rate limited by a previous test and go straight to `catch`
-    try {
-      const response = await client.get('help/configuration');
-      // Since this didn't throw, we'll be running 2 more assertions below
-      expect.assertions(4);
-      expect(response).toHaveProperty('photo_sizes');
-      expect(response._headers).toHaveProperty('x-rate-limit-limit', ['15']);
-      let [remaining] = response._headers['x-rate-limit-remaining'];
-      while (
-        remaining-- >= -1 // force exceeding the rate limit
-      )
-        await client.get('help/configuration');
-    } catch (e) {
-      expect(e.errors[0]).toHaveProperty('code', 88); // Rate limit exceeded
-      expect(e._headers).toHaveProperty('x-rate-limit-remaining', ['0']);
-    }
-  }, 10 * 1000);
+  it(
+    'should get rate limited',
+    async () => {
+      expect.assertions(2); // assume we were rate limited by a previous test and go straight to `catch`
+      try {
+        const response = await client.get('help/configuration');
+        // Since this didn't throw, we'll be running 2 more assertions below
+        expect.assertions(4);
+        expect(response).toHaveProperty('photo_sizes');
+        expect(response._headers).toHaveProperty('x-rate-limit-limit', ['15']);
+        let [remaining] = response._headers['x-rate-limit-remaining'];
+        while (
+          remaining-- >= -1 // force exceeding the rate limit
+        )
+          await client.get('help/configuration');
+      } catch (e) {
+        expect(e.errors[0]).toHaveProperty('code', 88); // Rate limit exceeded
+        expect(e._headers).toHaveProperty('x-rate-limit-remaining', ['0']);
+      }
+    },
+    10 * 1000,
+  );
 });
 
 describe('posting', () => {
@@ -200,7 +202,9 @@ describe('posting', () => {
     });
 
     expect(response).toMatchObject({
-      text: htmlEscape(STRING_WITH_SPECIAL_CHARS + message + STRING_WITH_SPECIAL_CHARS),
+      text: htmlEscape(
+        STRING_WITH_SPECIAL_CHARS + message + STRING_WITH_SPECIAL_CHARS,
+      ),
     });
     const id = response.id_str;
     const deleted = await client.post('statuses/destroy', {
@@ -222,13 +226,13 @@ describe('uploading', () => {
     const mediaUploadResponse = await uploadClient.post('media/upload', {
       media_data: base64Image,
     });
-    expect(mediaUploadResponse).toMatchObject({ 
+    expect(mediaUploadResponse).toMatchObject({
       media_id_string: expect.any(String),
     });
 
     // Set alt text
     const imageAltString = 'Animated picture of a dancing banana';
-    await uploadClient.post('media/metadata/create', { 
+    await uploadClient.post('media/metadata/create', {
       media_id: mediaUploadResponse.media_id_string,
       alt_text: { text: imageAltString },
     });
@@ -237,13 +241,14 @@ describe('uploading', () => {
 
 describe('putting', () => {
   let client;
-  beforeAll(() => client = newClient());
+  beforeAll(() => (client = newClient()));
   /**
    * For this test you need to have opted to receive messages from anyone at https://twitter.com/settings/safety
    * and your demo app needs to have access to read, write, and direct messages.
    */
   it('can update welcome message', async () => {
-    const newWelcomeMessage = await client.post('direct_messages/welcome_messages/new',
+    const newWelcomeMessage = await client.post(
+      'direct_messages/welcome_messages/new',
       {
         welcome_message: {
           name: 'simple_welcome-message 01',
@@ -254,19 +259,23 @@ describe('putting', () => {
       },
     );
 
-    const updatedWelcomeMessage = await client.put('direct_messages/welcome_messages/update', {
-      id: newWelcomeMessage.welcome_message.id,
-    },
-    {
-      message_data: {
-        text: 'Welcome!!!',
+    const updatedWelcomeMessage = await client.put(
+      'direct_messages/welcome_messages/update',
+      {
+        id: newWelcomeMessage.welcome_message.id,
       },
-    });
+      {
+        message_data: {
+          text: 'Welcome!!!',
+        },
+      },
+    );
 
-    expect(updatedWelcomeMessage.welcome_message.message_data.text).toEqual('Welcome!!!');
+    expect(updatedWelcomeMessage.welcome_message.message_data.text).toEqual(
+      'Welcome!!!',
+    );
   });
-},
-);
+});
 
 describe('misc', () => {
   let client;
@@ -339,7 +348,7 @@ describe('misc', () => {
     expect(usersPost).toMatchObject(expectedIds);
     // Check if GET worked the same
     const usersGet = await client.get('users/lookup', { user_id: userIds });
-    expect(usersGet.map(u => u)).toMatchObject(expectedIds); // map(u => u) is an alternative to deleting _headers
+    expect(usersGet.map((u) => u)).toMatchObject(expectedIds); // map(u => u) is an alternative to deleting _headers
   });
 
   it('should be unable to get details about suspended user', async () => {
@@ -364,4 +373,3 @@ describe('misc', () => {
     expect(response).toHaveLength(2);
   });
 });
-
