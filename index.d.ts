@@ -1,9 +1,9 @@
-/** 
- * Typings for twitter-lite 
- * 
+/**
+ * Typings for twitter-lite
+ *
  * @version 0.10-1.0
  * @author Floris de Bijl <@fdebijl>
- * 
+ *
  * @example
  * const Twitter = require('twitter-lite')
  *
@@ -13,7 +13,7 @@
  *  access_token_key: 'XYZ',
  *  access_token_secret: 'XYZ'
  * });
- * 
+ *
  * @example
  * // Enable esModuleInterop in your tsconfig to import typings
  * import Twitter, { TwitterOptions } from 'twitter-lite'
@@ -33,12 +33,12 @@ import { EventEmitter } from 'events';
 import * as OAuth from 'oauth-1.0a';
 
 export default class Twitter {
-  #authType: AuthType;
-  #url: string;
-  #oauth: string;
-  #config: TwitterOptions;
-  #client: OAuth;
-  #token: KeySecret;
+  private authType: AuthType;
+  private url: string;
+  private oauth: string;
+  private config: TwitterOptions;
+  private client: OAuth;
+  private token: KeySecret;
 
   constructor(options: TwitterOptions);
 
@@ -59,8 +59,14 @@ export default class Twitter {
    * @param {'GET | 'POST' | 'PUT'}
    * @param {string} resource - the API endpoint
    */
-  private _makeRequest(method: 'GET' | 'POST' | 'PUT', resource: string, parameters: object): { requestData: { url: string; method: string; }; headers: ({ Authorization: string; } | OAuth.Header); };
-
+  private _makeRequest(
+    method: 'GET' | 'POST' | 'PUT',
+    resource: string,
+    parameters: object
+  ): {
+    requestData: { url: string; method: string };
+    headers: { Authorization: string } | OAuth.Header;
+  };
 
   /**
    * Send a GET request
@@ -81,27 +87,35 @@ export default class Twitter {
    * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
    *   The `_header` property will be set to the Response headers (useful for checking rate limits)
    */
-  public post<T = any>(resource: string, body: object): Promise<T>
+  public post<T = any>(resource: string, body: object): Promise<T>;
 
   /**
-   * Send a PUT request 
+   * Send a PUT request
    * @type {T = any} Expected type for the response from this request, generally `object` or `array`.
    * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
    * @param {object} parameters - required or optional query parameters
-   * @param {object} body - PUT request body 
+   * @param {object} body - PUT request body
    * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
    */
-  public put<T = any>(resource: string, parameters: object, body: object): Promise<T>
+  public put<T = any>(
+    resource: string,
+    parameters: object,
+    body: object
+  ): Promise<T>;
 
   /**
    * Open a stream to a specified endpoint
-   * 
+   *
    * @param {string} resource - endpoint, e.g. `statuses/filter`
    * @param {object} parameters
    * @returns {Stream}
    */
   public stream(resource: string, parameters: object): Stream;
 }
+
+/* In reality snowflakes are BigInts. Once BigInt is supported by browsers and Node per default, we could adjust this type.
+Currently Twitter themselves convert it to strings for the API though, so this change will come some time in the far future. */
+type snowflake = string;
 
 interface TwitterOptions {
   /** "api" is the default (change for other subdomains) */
@@ -139,18 +153,23 @@ interface BearerResponse {
   access_token: string;
 }
 
-interface TokenResponse {
-  oauth_token: OauthToken;
-  oauth_token_secret: OauthTokenSecret;
-}
+type TokenResponse =
+  | {
+      oauth_token: OauthToken;
+      oauth_token_secret: OauthTokenSecret;
+      oauth_callback_confirmed: true;
+    }
+  | { oauth_callback_confirmed: false };
 
-interface AccessTokenResponse extends TokenResponse {
-  user_id: number;
+interface AccessTokenResponse {
+  oauth_token: string;
+  oauth_token_secret: string;
+  user_id: snowflake;
   screen_name: string;
 }
-  
+
 declare class Stream extends EventEmitter {
   constructor();
 
   parse(buffer: Buffer): void;
-} 
+}
