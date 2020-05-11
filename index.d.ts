@@ -172,4 +172,5 @@ declare class Stream extends EventEmitter {
   constructor();
 
   parse(buffer: Buffer): void;
+  destroy(): void;
 }
