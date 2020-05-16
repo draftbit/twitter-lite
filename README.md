@@ -320,6 +320,15 @@ You can find many more examples for various resources/endpoints in [the tests](t
 
 ## Troubleshooting
 
+### Headers on success
+
+```es6
+const tweets = await client.get("statuses/home_timeline");
+console.log(`Rate: ${tweets._headers.get('x-rate-limit-remaining')} / ${tweets._headers.get('x-rate-limit-limit')}`);
+const delta = (tweets._headers.get('x-rate-limit-reset') * 1000) - Date.now()
+console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`);
+```
+
 ### API errors
 
 `.get` and `.post` reject on error, so you can use try/catch to handle errors. The error object contains an `errors` property with the error `code` and `message`, and a `_headers` property with the the HTTP response code and [Headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html) object returned by the Twitter API.
