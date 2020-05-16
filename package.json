@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Tiny, full-featured client/server REST/stream library for the Twitter API",
   "source": "twitter.js",
   "main": "dist/twitter.js",
