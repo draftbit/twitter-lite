@@ -331,7 +331,7 @@ console.log(`Reset: ${Math.ceil(delta / 1000 / 60)} minutes`);
 
 ### API errors
 
-`.get` and `.post` reject on error, so you can use try/catch to handle errors. The error object contains an `errors` property with the error `code` and `message`, and a `_headers` property with the the HTTP response code and [Headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html) object returned by the Twitter API. Note that each `_headers` property is an array, usually of length 1.
+`.get` and `.post` reject on error, so you can use try/catch to handle errors. The error object contains an `errors` property with the error `code` and `message`, and a `_headers` property with the the HTTP response code and [Headers](https://developer.twitter.com/en/docs/basics/rate-limiting.html) object returned by the Twitter API.
 
 ```es6
 try {
@@ -342,7 +342,7 @@ try {
     // Twitter API error
     if (e.errors[0].code === 88)
       // rate limit exceeded
-      console.log("Rate limit will reset on", new Date(e._headers["x-rate-limit-reset"] * 1000));
+      console.log("Rate limit will reset on", new Date(e._headers.get("x-rate-limit-reset") * 1000));
     else
       // some other kind of error, e.g. read-only API trying to POST
   } else {

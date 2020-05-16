@@ -85,8 +85,8 @@ class Twitter {
    * @private
    */
   static async _handleResponse(response) {
+    const headers = response.headers; // TODO: see #44
     if (response.ok) {
-      const headers = response.headers; // TODO: see #44
       // Return empty response on 204 "No content", or Content-Length=0
       if (response.status === 204 || response.headers.get('content-length') === '0')
         return {
@@ -98,7 +98,10 @@ class Twitter {
         return res;
       });
     } else {
-      throw await response.json();
+      throw {
+        _headers: headers,
+        ...await response.json(),
+      };
     }
   }
 
