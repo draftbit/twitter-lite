@@ -41,7 +41,7 @@ const JSON_ENDPOINTS = [
   'direct_messages/welcome_messages/new',
   'direct_messages/welcome_messages/rules/new',
   'media/metadata/create',
-  'collections/entries/curate'
+  'collections/entries/curate',
 ];
 
 const baseHeaders = {
