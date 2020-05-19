@@ -157,9 +157,9 @@ type TokenResponse =
   | {
       oauth_token: OauthToken;
       oauth_token_secret: OauthTokenSecret;
-      oauth_callback_confirmed: true;
+      oauth_callback_confirmed: 'true';
     }
-  | { oauth_callback_confirmed: false };
+  | { oauth_callback_confirmed: 'false' };
 
 interface AccessTokenResponse {
   oauth_token: string;
