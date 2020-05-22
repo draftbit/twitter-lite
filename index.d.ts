@@ -130,6 +130,8 @@ interface TwitterOptions {
   access_token_key?: OauthToken;
   /** access token secret from your User (oauth_token_secret) */
   access_token_secret?: OauthTokenSecret;
+  /** bearer token */
+  bearer_token?: string;
 }
 
 type OauthToken = string;
