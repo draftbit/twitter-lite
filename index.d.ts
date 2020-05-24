@@ -135,6 +135,7 @@ interface TwitterOptions {
 type OauthToken = string;
 type OauthTokenSecret = string;
 type AuthType = 'App' | 'User';
+type BoolStr = 'true' | 'false';
 
 interface KeySecret {
   key: string;
@@ -153,13 +154,11 @@ interface BearerResponse {
   access_token: string;
 }
 
-type TokenResponse =
-  | {
-      oauth_token: OauthToken;
-      oauth_token_secret: OauthTokenSecret;
-      oauth_callback_confirmed: 'true';
-    }
-  | { oauth_callback_confirmed: 'false' };
+interface TokenResponse {
+  oauth_token?: OauthToken;
+  oauth_token_secret?: OauthTokenSecret;
+  oauth_callback_confirmed: BoolStr;
+}
 
 interface AccessTokenResponse {
   oauth_token: string;
