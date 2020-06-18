@@ -117,11 +117,16 @@ export default class Twitter {
 Currently Twitter themselves convert it to strings for the API though, so this change will come some time in the far future. */
 type snowflake = string;
 
-interface TwitterOptions {
+type TwitterOptions = TwitterOptionsUserAuthentication | TwitterOptionsAppAuthentication
+
+interface TwitterOptionsBasics {
   /** "api" is the default (change for other subdomains) */
   subdomain?: string;
   /** version "1.1" is the default (change for other subdomains) */
   version?: string;
+}
+
+interface TwitterOptionsUserAuthentication extends TwitterOptionsBasics {
   /** consumer key from Twitter. */
   consumer_key: string;
   /** consumer secret from Twitter */
@@ -131,7 +136,20 @@ interface TwitterOptions {
   /** access token secret from your User (oauth_token_secret) */
   access_token_secret?: OauthTokenSecret;
   /** bearer token */
-  bearer_token?: string;
+  bearer_token?: never;
+}
+
+interface TwitterOptionsAppAuthentication extends TwitterOptionsBasics {
+  /** consumer key from Twitter. */
+  consumer_key?: never;
+  /** consumer secret from Twitter */
+  consumer_secret?: never;
+  /** access token key from your User (oauth_token) */
+  access_token_key?: never;
+  /** access token secret from your User (oauth_token_secret) */
+  access_token_secret?: never;
+  /** bearer token */
+  bearer_token: string;
 }
 
 type OauthToken = string;
