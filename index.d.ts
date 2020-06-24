@@ -54,6 +54,11 @@ export default class Twitter {
 
   getAccessToken(options: AccessTokenOptions): Promise<AccessTokenResponse>;
 
+  /** Returns the appropriate url for the provided resource 
+   * @param {string} resource - The API endpoint
+  */
+  private _getResourceUrl(resource: string): string;
+
   /**
    * Construct the data and headers for an authenticated HTTP request to the Twitter API
    * @param {'GET | 'POST' | 'PUT'}
