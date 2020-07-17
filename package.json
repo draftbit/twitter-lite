@@ -47,7 +47,8 @@
   "scripts": {
     "lint": "eslint --fix ./",
     "prepare": "microbundle {stream,twitter}.js && bundlesize",
-    "test": "eslint --fix . && jest --detectOpenHandles",
+    "test": "eslint --fix . && jest --testPathIgnorePatterns=labs --detectOpenHandles",
+    "test-labs": "eslint --fix . && jest --testPathPattern=labs --detectOpenHandles",
     "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "husky": {

@@ -152,7 +152,7 @@ describe('posting', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
-  it('should DM user, including special characters', async () => {
+  it.skip('should DM user, including special characters', async () => {
     const message = randomString(); // prevent overzealous abuse detection
 
     // POST with JSON body and no parameters per https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event

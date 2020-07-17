@@ -7,6 +7,9 @@ const Stream = require('./stream');
 const getUrl = (subdomain, endpoint = '1.1') =>
   `https://${subdomain}.twitter.com/${endpoint}`;
 
+const getLabsUrl = (version, endpoint) =>
+  `https://api.twitter.com/labs/${version}/tweets/${endpoint}`;
+
 const createOauthClient = ({ key, secret }) => {
   const client = OAuth({
     consumer: { key, secret },
@@ -180,7 +183,7 @@ class Twitter {
     let parameters = { oauth_verifier: options.oauth_verifier, oauth_token: options.oauth_token };
     if (parameters.oauth_verifier && parameters.oauth_token) requestData.url += '?' + querystring.stringify(parameters);
 
-    const headers = this.client.toHeader( this.client.authorize(requestData) );
+    const headers = this.client.toHeader(this.client.authorize(requestData));
 
     const results = await Fetch(requestData.url, {
       method: 'POST',
@@ -189,6 +192,18 @@ class Twitter {
       .then(Twitter._handleResponseTextOrJson);
 
     return results;
+  }
+
+  _makeAuthorizationHeader(requestData) {
+    if (this.authType === 'User') {
+      return this.client.toHeader(
+        this.client.authorize(requestData, this.token),
+      );
+    } else {
+      return {
+        Authorization: `Bearer ${this.config.bearer_token}`,
+      };
+    }
   }
 
   /**
@@ -208,16 +223,7 @@ class Twitter {
       if (method === 'POST') requestData.data = parameters;
       else requestData.url += '?' + querystring.stringify(parameters);
 
-    let headers = {};
-    if (this.authType === 'User') {
-      headers = this.client.toHeader(
-        this.client.authorize(requestData, this.token),
-      );
-    } else {
-      headers = {
-        Authorization: `Bearer ${this.config.bearer_token}`,
-      };
-    }
+    let headers = this._makeAuthorizationHeader(requestData);
     return {
       requestData,
       headers,
@@ -351,6 +357,171 @@ class Twitter {
 
     return stream;
   }
+
+  withLabs() {
+    return new TwitterLabs(this);
+  }
+
+  /**
+   * Create a simple rule structure, useful when twitter labs filter stream rules
+   * 
+   * @param {string} value the rule value
+   * @param {string} [tag] tag associated with rule
+   * @returns {{value: string, tag?: string}} object that can be used to add rules
+   */
+  static labsFilterStreamRule(value, tag) {
+    if (tag) return { value, tag };
+    else return { value };
+  }
+}
+
+/**
+ * Rule structure when adding twitter labs filter stream rules
+ * @typedef {{value: string, tag?: string}} LabsFilterStreamRule
+ */
+
+/**
+ * Twitter labs expansions
+ * @typedef {'attachment.poll_ids'|'attachments.media_keys'|'author_id'|'entities.mentions.username'|
+ * 'geo.place_id'|'in_reply_to_user_id'|'referenced_tweets.id'|'referenced_tweets.id.author_id'} LabsExpansion
+ * @see {@link https://developer.twitter.com/en/docs/labs/overview/whats-new/expansions About expansions}
+ */
+
+/**
+ * Twitter labs response format
+ * @typedef {'compact'|'detailed'|'default'} LabsFormat
+ * @see {@link https://developer.twitter.com/en/docs/labs/overview/whats-new/formats About format}
+ */
+
+/**
+ * Twitter class that enhances its functionalities with Twitter Labs API calls
+ * @augments {Twitter}
+ */
+class TwitterLabs extends Twitter {
+  /**
+   * Class that also enables requests to Twitter Labs APIs using the given original {@link Twitter} instances
+   * 
+   * @constructor
+   * @param {Twitter} originalTwitter original twitter instance
+   */
+  constructor(originalTwitter) {
+    super();
+    // copy properties for ease
+    Object.defineProperties(this, Object.getOwnPropertyDescriptors(originalTwitter));
+  }
+
+  _makeLabsRequest(method, version, resource, queryParams) {
+    const requestData = {
+      url: `${getLabsUrl(version, resource)}`,
+      method,
+    };
+    if (queryParams) requestData.url += '?' + querystring.stringify(queryParams);
+
+    let headers = this._makeAuthorizationHeader(requestData);
+    return {
+      requestData,
+      headers,
+    };
+  }
+
+  /**
+   * Add rule for the filter stream API
+   * 
+   * @param {LabsFilterStreamRule[]} rules a list of rules for the filter stream API 
+   * @param {boolean} [dryRun] optional parameter to mark the request as a dry run 
+   * @returns {Promise<object>} Promise response from Twitter API
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/post-tweets-stream-filter-rules Twitter API}
+   */
+  addRules(rules, dryRun) {
+    let queryParams = {};
+    if (dryRun) queryParams = { dry_run: true };
+    const { requestData, headers } = this._makeLabsRequest('POST', '1', 'stream/filter/rules', queryParams);
+    const postHeaders = Object.assign({}, baseHeaders, headers);
+    return Fetch(requestData.url, {
+      method: requestData.method,
+      headers: postHeaders,
+      body: JSON.stringify({ add: rules }),
+    }).then(Twitter._handleResponse);
+  }
+
+  /**
+   * Get registered rules
+   *
+   * @returns {Promise<object>} Promise response from Twitter API
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/get-tweets-stream-filter-rules Twitter API}
+   */
+  getRules(...ids) {
+    let queryParams = {};
+    if (ids) queryParams = { ids: ids.join(',') };
+    const { requestData, headers } = this._makeLabsRequest('GET', '1', 'stream/filter/rules', queryParams);
+    return Fetch(requestData.url, {
+      method: requestData.method,
+      headers,
+    }).then(Twitter._handleResponse);
+  }
+
+  /**
+   * Delete registered rules
+   * 
+   * @param {string[]} Rule IDs that has been registered 
+   * @param {boolean} [dryRun] optional parameter to mark request as a dry run 
+   * @returns {Promise<object>} Promise response from Twitter API
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/get-tweets-stream-filter-rules Twitter API}
+   */
+  deleteRules(ids, dryRun) {
+    let queryParams = {};
+    if (dryRun) queryParams = { dry_run: dryRun };
+    const { requestData, headers } = this._makeLabsRequest('POST', '1', 'stream/filter/rules', queryParams);
+    const postHeaders = Object.assign({}, baseHeaders, headers);
+    return Fetch(requestData.url, {
+      method: requestData.method,
+      headers: postHeaders,
+      body: JSON.stringify({ delete: { ids } }),
+    }).then(Twitter._handleResponse);
+  }
+
+  /**
+   * Start filter stream using saved rules
+   *  
+   * @param {{expansions: LabsExpansion[], format: LabsFormat, 'place.format': LabsFormat,
+   *  'tweet.format': LabsFormat, 'user.format': LabsFormat}} [queryParams]
+   * @returns {Stream} stream object for the filter stream
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/get-tweets-stream-filter Twitter API}
+   */
+  filterStream(queryParams) {
+    if (queryParams && queryParams.expansions) {
+      queryParams.expansions = queryParams.expansions.join(',');
+    }
+    const { requestData, headers } = this._makeLabsRequest('GET', '1', 'stream/filter', queryParams);
+    console.log(requestData.url);
+
+    const stream = new Stream();
+    const request = Fetch(requestData.url, {
+      method: requestData.method,
+      headers,
+    });
+
+    request
+      .then(response => {
+        stream.destroy = this.stream.destroy = () => response.body.destroy();
+
+        if (response.ok) {
+          stream.emit('start', response);
+        } else {
+          response._headers = response.headers;
+          stream.emit('error', response);
+        }
+
+        response.body
+          .on('data', chunk => stream.parse(chunk))
+          .on('error', error => stream.emit('error', error))
+          .on('end', () => stream.emit('end', response));
+      })
+      .catch(error => stream.emit('error', error));
+
+    return stream;
+  }
+
 }
 
 module.exports = Twitter;

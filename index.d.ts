@@ -111,6 +111,22 @@ export default class Twitter {
    * @returns {Stream}
    */
   public stream(resource: string, parameters: object): Stream;
+
+  /**
+   * Creates an instance of the original {@instance Twitter} with labs API capabilities 
+   * @return {TwitterLabs} - a twitter labs instance
+   */
+  public withLabs(): TwitterLabs;
+
+  /**
+   * Add rule for the filter stream API
+   *
+   * @param {LabsFilterStreamRule[]} rules a list of rules for the filter stream API
+   * @param {boolean} [dryRun] optional parameter to mark the request as a dry run
+   * @returns {Promise<object>} Promise response from Twitter API
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/post-tweets-stream-filter-rules Twitter API}
+   */
+  public static labsFilterStreamRule(value: string, tag?: string): FilterStreamRule;
 }
 
 /* In reality snowflakes are BigInts. Once BigInt is supported by browsers and Node per default, we could adjust this type.
@@ -157,10 +173,10 @@ interface BearerResponse {
 
 type TokenResponse =
   | {
-      oauth_token: OauthToken;
-      oauth_token_secret: OauthTokenSecret;
-      oauth_callback_confirmed: 'true';
-    }
+    oauth_token: OauthToken;
+    oauth_token_secret: OauthTokenSecret;
+    oauth_callback_confirmed: 'true';
+  }
   | { oauth_callback_confirmed: 'false' };
 
 interface AccessTokenResponse {
@@ -176,3 +192,82 @@ declare class Stream extends EventEmitter {
   parse(buffer: Buffer): void;
   destroy(): void;
 }
+
+export class TwitterLabs extends Twitter {
+  /**
+    * Construct the data and headers for an authenticated HTTP request to the Twitter Labs API
+    * @param {'GET | 'POST' | 'PUT'} method
+    * @param {'1' | '2'} version
+    * @param {string} resource - the API endpoint
+    * @param {object} queryParams - query params object
+    */
+  private _makeLabsRequest(method: 'GET' | 'POST' | 'PUT', version: '1' | '2',
+    resource: string, queryParams: object): {
+      requestData: { url: string; method: string };
+      headers: { Authorization: string } | OAuth.Header;
+    };
+
+  /**
+   * Add rule for the filter stream API
+   * 
+   * @param {FilterStreamRule[]} rules a list of rules for the filter stream API 
+   * @param {boolean} [dryRun] optional parameter to mark the request as a dry run 
+   * @returns {Promise<object>} Promise response from Twitter API
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/post-tweets-stream-filter-rules Twitter API}
+   */
+  public addRules(rules: FilterStreamRule[], dryRun?: boolean): Promise<object>
+
+  /**
+   * Get registered rules
+   * 
+   * @returns {Promise<object>} Promise response from Twitter API 
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/get-tweets-stream-filter-rules Twitter API}
+   */
+  public getRules(...ids: string[]): Promise<object>
+
+  /**
+   * Delete registered rules
+   * 
+   * @param {string[]} Rule IDs that has been registered 
+   * @param {boolean} [dryRun] optional parameter to mark request as a dry run 
+   * @returns {Promise<object>} Promise response from Twitter API
+   * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/get-tweets-stream-filter-rules Twitter API}
+   */
+  public deleteRules(ids: string[], dryRun?: boolean): Promise<object>
+
+
+  /**
+ * Start filter stream using saved rules
+ *  
+ * @param {{expansions: Expansions[], format: Format, 'place.format': Format,
+ *  'tweet.format': Format, 'user.format': Format}} [queryParams]
+ * @returns {Stream} stream object for the filter stream
+ * @see {@link https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference/get-tweets-stream-filter Twitter API}
+ */
+  filterStream(queryParams?: FilterStreamParams): Stream
+}
+
+/**
+ * Rule structure when adding twitter labs filter stream rules
+ */
+type FilterStreamRule = { value: string, meta?: string };
+
+/**
+ * Twitter labs response format
+ * @see {@link https://developer.twitter.com/en/docs/labs/overview/whats-new/formats About format}
+ */
+type LabsFormat = 'compact' | 'detailed' | 'default';
+
+/**
+ * Twitter labs expansions
+ * @see {@link https://developer.twitter.com/en/docs/labs/overview/whats-new/expansions About expansions}
+ */
+type LabsExpansion = 'attachment.poll_ids' | 'attachments.media_keys' | 'author_id' | 'entities.mentions.username' | 'geo.place_id'
+  | 'in_reply_to_user_id' | 'referenced_tweets.id' | 'referenced_tweets.id.author_id';
+type FilterStreamParams = {
+  expansions?: LabsExpansion[],
+  format?: LabsFormat,
+  'place.format'?: LabsFormat,
+  'tweet.format'?: LabsFormat,
+  'user.format'?: LabsFormat
+};
