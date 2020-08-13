@@ -5,7 +5,7 @@
   "source": "twitter.js",
   "main": "dist/twitter.js",
   "module": "dist/twitter.m.js",
-  "types": "index.d.ts",
+  "types": "./typings/index.d.ts",
   "files": [
     "dist",
     "index.d.ts"

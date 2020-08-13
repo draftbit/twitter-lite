@@ -94,8 +94,8 @@ export default class Twitter {
    * @returns {Promise<any>} Promise resolving to the response from the Twitter API.
    *   The `_header` property will be set to the Response headers (useful for checking rate limits)
    */
-  public post<K extends keyof PostResources>(resource: K, body: PostResources[K][0]): Promise<PostResources[K][1]>
-  public post<T = any>(resource: string, body: object): Promise<T>;
+  public post<K extends keyof PostEndpoints>(resource: K, body: PostEndpoints[K][0]): Promise<PostEndpoints[K][1]>
+  // public post<T = any>(resource: string, body: object): Promise<T>;
 
   /**
    * Send a PUT request
@@ -181,107 +181,107 @@ interface AccessTokenResponse {
 
 //#region PostRequestBody
 
-interface BasePostBody {
+export class BasePostBody {
   /**
    * Desired status ID to do the action
    */
-  id?: string | number,
+  id?: string | number;
 }
 
-interface PostGeneralTweetBody extends BasePostBody {
+export class GeneralTweetPostBody extends BasePostBody {
   /**
    * Whether each tweet returned in a timeline will include a user object including only the status authors numerical ID.  
    * Omit this parameter to receive the complete user object.	
    */
-  trim_user?: boolean
+  trim_user?: boolean;
 }
 
-interface PostLikeTweetBody extends BasePostBody {
+export class GeneralPostBody extends BasePostBody {
   /**
    * The entities node will be omitted when set to false
    */
-  include_entities?: boolean
+  include_entities?: boolean;
 }
 
-interface PostUpdateTweetBody{
+export class UpdateTweetPostBody {
   /**
    * The content of the tweet
    */
-  status: string,
+  status: string;
 
   /**
    * The ID of an existing tweet that the update is in reply to  
    * Will be ignored if the tweet didn't include the replied tweet's author
    */
-  in_reply_to_status_id?: string,
+  in_reply_to_status_id?: string;
 
   /**
    * If set to `true` and used with `in_reply_to_status_id`, leading @mentions will be looked up from the original Tweet and added to the new Tweet from there.  
    * This will append @mentions into the metadata of an extended Tweet as a reply chain grows, until the limit on @mentions is reached.  
    * In cases where the original Tweet has been deleted, the reply will fail.	
    */
-  auto_populate_reply_metadata?: boolean,
+  auto_populate_reply_metadata?: boolean;
 
   /**
    * When used with auto_populate_reply_metadata, a comma-separated list of user ids which will be removed from the server-generated @mentions prefix on an extended Tweet. Note that the leading @mention cannot be removed as it would break the in-reply-to-status-id semantics. Attempting to remove it will be silently ignored.
    */
-  exclude_reply_user_ids?: string,
+  exclude_reply_user_ids?: string;
 
   /**
    * In order for a URL to not be counted in the status body of an extended Tweet, provide a URL as a Tweet attachment. This URL must be a Tweet permalink, or Direct Message deep link. Arbitrary, non-Twitter URLs must remain in the status text. URLs passed to the attachment_url parameter not matching either a Tweet permalink or Direct Message deep link will fail at Tweet creation and cause an exception
    */
-  attatchment_url?: string,
+  attatchment_url?: string;
 
   /**
    * A comma-delimited list of media_ids to associate with the Tweet. You may include up to 4 photos or 1 animated GIF or 1 video in a Tweet. See Uploading Media for further details on uploading media
    */
-  media_ids?: string,
+  media_ids?: string;
 
   /**
    * If you upload Tweet media that might be considered sensitive content such as nudity, or medical procedures, you must set this value to true. See Media setting and best practices for more context.
    */
-  possibly_sensitive?: boolean,	
+  possibly_sensitive?: boolean;
 
   /**
    * The latitude of the location this Tweet refers to. This parameter will be ignored unless it is inside the range -90.0 to +90.0 (North is positive) inclusive. It will also be ignored if there is no corresponding long parameter.
    */
-  lat?:	number,
+  lat?:	number;
 
   /**
    * The longitude of the location this Tweet refers to. The valid ranges for longitude are -180.0 to +180.0 (East is positive) inclusive. This parameter will be ignored if outside that range, if it is not a number, if geo_enabled is disabled, or if there no corresponding lat parameter.
    */
-  long?:	number,
+  long?:	number;
 
   /**
    * A place in the world
    */
-  place_id?:	string,
+  place_id?:	string;
 
   /**
    * Whether or not to put a pin on the exact coordinates a Tweet has been sent from
    */
-  display_coordinates?:	boolean,
+  display_coordinates?:	boolean;
 
 
   /**
    * Whether the response will include a user object including only the author's ID. Omit this parameter to receive the complete user object.
    */
-  trim_user?:	boolean,
+  trim_user?:	boolean;
 
   /**
    * When set to true, enables shortcode commands for sending Direct Messages as part of the status text to send a Direct Message to a user. When set to false, disables this behavior and includes any leading characters in the status text that is posted	
    */
-  enable_dmcommands?:	boolean,
+  enable_dmcommands?:	boolean;
 
   /**
    * When set to true, causes any status text that starts with shortcode commands to return an API error. When set to false, allows shortcode commands to be sent in the status text and acted on by the API.	
    */
-  fail_dmcommands?:	boolean,
+  fail_dmcommands?:	boolean;
 
   /**
    * Associate an ads card with the Tweet using the card_uri value from any ads card response.
    */
-  card_uri?: string
+  card_uri?: string;
 }
 
 //#endregion
@@ -305,7 +305,7 @@ export interface Tweet {
   /**
    * Whether the tweet contains coordinate
    */
-  coordinates: PointCoordinates | PolygonCoordinates | null;
+  coordinates: TweetPointCoordinates | TweetPolygonCoordinates | null;
 
   /**
    * Whether the tweet is Liked by the current user
@@ -390,12 +390,12 @@ export interface Tweet {
   /**
    * The author of the Tweet
    */
-  user: User;
+  user: TwitterUser;
   possibly_sensitive_editable?:   boolean;
   source:                         string;
   in_reply_to_screen_name:        null | string;
   in_reply_to_status_id:          number | null;
-  extended_entities?:             ExtendedEntities;
+  extended_entities?:             TweetExtendedEntities;
   is_quote_status?:               boolean;
   favorite_count?:                number;
   possibly_sensitive_appealable?: boolean;
@@ -406,29 +406,29 @@ export interface Tweet {
 export interface Headers {
 }
 
-export interface PointCoordinates {
+export interface TweetPointCoordinates {
   type: 'Point';
   coordinates: number[];
 }
-export interface PolygonCoordinates {
+export interface TweetPolygonCoordinates {
   type: 'Polygon';
   coordinates: number[][];
 }
 
 export interface TweetEntities {
-  urls:          Url[];
-  hashtags:      Hashtag[];
+  urls:          TweetUrl[];
+  hashtags:      TweetHashtag[];
   user_mentions: any[];
   symbols?:      any[];
-  media?:        Media[];
+  media?:        TweetMedia[];
 }
 
-export interface Hashtag {
-  text:    string;
+export interface TweetHashtag {
+  text: string;
   indices: number[];
 }
 
-export interface Media {
+export interface TweetMedia {
   id:              number;
   id_str:          string;
   indices:         number[];
@@ -438,61 +438,107 @@ export interface Media {
   display_url:     string;
   expanded_url:    string;
   type:            string;
-  sizes:           MediaSize;
+  sizes:           TweetMediaSize;
 }
 
-export interface MediaSize {
-  medium: MediaResolution;
-  small:  MediaResolution;
-  thumb:  MediaResolution;
-  large:  MediaResolution;
+export interface TweetMediaSize {
+  medium: TweetMediaResolution;
+  small:  TweetMediaResolution;
+  thumb:  TweetMediaResolution;
+  large:  TweetMediaResolution;
 }
 
-export interface MediaResolution {
+export interface TweetMediaResolution {
   w: number;
   h: number;
   resize: string;
 }
 
-export interface Url {
+/**
+ * Twitter shortened link  
+ * Starts with `t.co`
+ */
+export interface TweetUrl {
   expanded_url: string;
   url:          string;
   indices:      number[];
   display_url:  string;
 }
 
-export interface ExtendedEntities {
-  media: Media[];
+export interface TweetExtendedEntities {
+  media: TweetMedia[];
 }
 
-export interface User {
-  name:                               string;
+// Might not have the full detail (User data from Tweet)
+export interface TwitterUser {
+  /**
+   * The User's display name
+   */
+  name: string;
   profile_sidebar_border_color:       string;
   profile_sidebar_fill_color:         string;
   profile_background_tile:            boolean;
-  profile_image_url:                  string;
+
+  /**
+   * The URL of the User's profile picture
+   */
+  profile_image_url: string;
   created_at:                         string;
-  location:                           string;
+
+  /**
+   * The User's location
+   */
+  location: string;
   is_translator:                      boolean;
-  follow_request_sent:                boolean;
-  id_str:                             string;
+
+  /**
+   * Whether the current account has sent a follow request to the user
+   */
+  follow_request_sent: boolean;
+
+  /**
+   * The User's ID represented as string
+   */
+  id_str: string;
   profile_link_color:                 string;
   entities:                           UserEntities;
   default_profile:                    boolean;
   contributors_enabled:               boolean;
-  url:                                null | string;
-  favourites_count:                   number;
+
+  /**
+   * The User's twitter profile URL  
+   * TODO: Figure out why this sometimes is null
+   */
+  url: null | string;
+  
+  /**
+   * The User's amount of liked tweet
+   */
+  favourites_count: number;
   utc_offset:                         number | null;
-  id:                                 number;
+  
+  /**
+   * The User's ID  
+   * Consider using `id_str`
+   */
+  id: number;
   profile_image_url_https:            string;
   profile_use_background_image:       boolean;
   listed_count:                       number;
   profile_text_color:                 string;
   protected:                          boolean;
   lang:                               null | string;
-  followers_count:                    number;
+
+  /**
+   * The amount of followers the user have
+   */
+  followers_count: number;
   time_zone:                          null | string;
   profile_background_image_url_https: null | string;
+
+  /**
+   * Whether the User is verified on Twitter
+   */
   verified:                           boolean;
   profile_background_color:           string;
   notifications:                      boolean;
@@ -517,24 +563,24 @@ export interface UserEntities {
 }
 
 export interface Description {
-  urls: Url[];
+  urls: TweetUrl[];
 }
 
 
 //#endregion
 
 // APIEndpoint: [[Array of possible body], [Array of possible response]]
-interface PostResources {
+interface PostEndpoints {
   // Tweets - https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference
-  'statuses/update': [[PostUpdateTweetBody], [Tweet]],
-  'statuses/destroy': [[PostGeneralTweetBody], [Tweet]],
-  'statuses/retweet': [[PostGeneralTweetBody], [Tweet]],
-  'statuses/unretweet': [[PostGeneralTweetBody], [Tweet]],
-  'favorites/create': [[], [Likes]],
-  'favorites/destroy': [[], [Likes]],
+  'statuses/update': [UpdateTweetPostBody, Tweet],
+  'statuses/destroy': [GeneralTweetPostBody, Tweet],
+  'statuses/retweet': [GeneralTweetPostBody, Tweet],
+  'statuses/unretweet': [GeneralTweetPostBody, Tweet],
+  'favorites/create': [GeneralPostBody, Tweet],
+  'favorites/destroy': [GeneralPostBody, Tweet],
   'statuses/update_with_media': [[], []], // Deprecated
 
-  // TODO: Comeplete everything below
+  // TODO: Complete everything below
 
   // Friendships - https://developer.twitter.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference
   // Also known as following someone
