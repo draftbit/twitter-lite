@@ -354,3 +354,5 @@ class Twitter {
 }
 
 module.exports = Twitter;
+
+Twitter.default = Twitter;
