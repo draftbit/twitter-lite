@@ -51,7 +51,7 @@ describe('core', () => {
   });
 });
 
-describe('auth', () => {
+describe.skip('auth', () => {
   it('should fail on invalid access_token_secret', async () => {
     const client = new Twitter({
       subdomain: 'api',
@@ -120,7 +120,7 @@ describe('auth', () => {
   });
 });
 
-describe('rate limits', () => {
+describe.skip('rate limits', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
@@ -148,7 +148,7 @@ describe('rate limits', () => {
   );
 });
 
-describe('posting', () => {
+describe.skip('posting', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
@@ -216,7 +216,7 @@ describe('posting', () => {
   });
 });
 
-describe('uploading', () => {
+describe.skip('uploading', () => {
   let uploadClient;
   beforeAll(() => (uploadClient = newClient('upload')));
 
@@ -239,7 +239,7 @@ describe('uploading', () => {
   });
 });
 
-describe('putting', () => {
+describe.skip('putting', () => {
   let client;
   beforeAll(() => (client = newClient()));
   /**
@@ -277,7 +277,7 @@ describe('putting', () => {
   });
 });
 
-describe('misc', () => {
+describe.skip('misc', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
