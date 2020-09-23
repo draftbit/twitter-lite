@@ -92,7 +92,7 @@ function switchStream({ count, waitBetweenStreams, done, errorHandler }) {
 it('should default export to be a function', () => {
   expect(new Stream()).toBeInstanceOf(Stream);
 });
-describe.skip('streams', () => {
+describe('streams', () => {
   beforeEach(() => {
     console.log(new Date().toISOString(), 'Waiting 60s...');
     return sleep(60 * 1000);
