@@ -77,8 +77,8 @@ class Twitter {
     this.oauth = getUrl(config.subdomain, 'oauth');
     this.config = config;
   }
-
-  /**
+  
+  /** 
    * Parse the JSON from a Response object and add the Headers under `_headers`
    * @param {Response} response - the Response object returned by Fetch
    * @return {Promise<object>}
@@ -127,6 +127,15 @@ class Twitter {
       }
       return Promise.reject(error);
     }
+  }
+
+  /**
+   * Change the version of the Twitter API. This is sticky and will remain at the new version until the next change
+   * @param {version} version - the Twitter API version, either 1.1 or 2
+   */
+  setApi(version) {
+    this.config.version = version;
+    this.url = getUrl(this.config.subdomain, this.config.version);
   }
 
   async getBearerToken() {

@@ -45,13 +45,19 @@ describe('core', () => {
     expect(new Twitter().url).toEqual('https://api.twitter.com/1.1');
   });
 
+  it('should change the url on API change', () => {
+    const twitter = new Twitter();
+    twitter.setApi(2);
+    expect(twitter.url).toEqual('https://api.twitter.com/2');
+  });
+
   it('should return a stream API URL', () => {
     const options = { subdomain: 'stream' };
     expect(new Twitter(options).url).toEqual('https://stream.twitter.com/1.1');
   });
 });
 
-describe.skip('auth', () => {
+describe('auth', () => {
   it('should fail on invalid access_token_secret', async () => {
     const client = new Twitter({
       subdomain: 'api',
@@ -120,7 +126,7 @@ describe.skip('auth', () => {
   });
 });
 
-describe.skip('rate limits', () => {
+describe('rate limits', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
@@ -148,7 +154,7 @@ describe.skip('rate limits', () => {
   );
 });
 
-describe.skip('posting', () => {
+describe('posting', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
@@ -216,7 +222,7 @@ describe.skip('posting', () => {
   });
 });
 
-describe.skip('uploading', () => {
+describe('uploading', () => {
   let uploadClient;
   beforeAll(() => (uploadClient = newClient('upload')));
 
@@ -239,7 +245,7 @@ describe.skip('uploading', () => {
   });
 });
 
-describe.skip('putting', () => {
+describe('putting', () => {
   let client;
   beforeAll(() => (client = newClient()));
   /**
@@ -277,7 +283,7 @@ describe.skip('putting', () => {
   });
 });
 
-describe.skip('misc', () => {
+describe('misc', () => {
   let client;
   beforeAll(() => (client = newClient()));
 
