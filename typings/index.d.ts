@@ -32,11 +32,19 @@
 import { EventEmitter } from 'events';
 import * as OAuth from 'oauth-1.0a';
 
-declare class Stream extends EventEmitter {
+declare class StatusesStream extends EventEmitter {
   constructor();
 
   parse(buffer: Buffer): void;
   destroy(): void;
+  
+  public on(event: 'ping', listener: () => void): this
+  public on(event: 'data', listener: (data: Tweet) => void): this
+  public on(event: 'error', listener: (error: Error) => void): this
+
+  public once(event: 'ping', listener: () => void): this
+  public once(event: 'data', listener: (data: Tweet) => void): this
+  public once(event: 'error', listener: (error: Error) => void): this
 }
 
 export default class Twitter {
@@ -116,9 +124,9 @@ export default class Twitter {
    *
    * @param {string} resource - endpoint, e.g. `statuses/filter`
    * @param {object} parameters
-   * @returns {Stream}
+   * @returns {StatusesStream} The stream
    */
-  public stream(resource: string, parameters: object): Stream;
+  public stream(resource: 'statuses/filter', parameters: TwitterStreamParams): StatusesStream;
 }
 
 /* In reality snowflakes are BigInts. Once BigInt is supported by browsers and Node per default, we could adjust this type.
@@ -178,6 +186,44 @@ interface AccessTokenResponse {
   screen_name: string;
 }
 
+interface TwitterStreamParams {
+  /**
+   * A comma-separated, case-insensitive and order-insensitive list of phrases used to filter seperated by spaces.
+   * Think of commas as Logical ORs while spaces are logical ANDs
+   * 
+   * * Phrases must be between 1 and 60 bytes, inclusive
+   * * Exact matching of phrases is not supported
+   * 
+   * @see [Twitter API - Track Stream Parameter](https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guides/basic-stream-parameters#track)
+   * @example `the twitter` - `the` AND `twitter`
+   * @example `the,twitter` - `the` OR `twitter`
+   * @example `the,this twitter` - (`the` OR `this`) `twitter`
+   */
+  track?: string
+  
+  /**
+   * Twitter UserID to filter, seperated with a `,`
+   * @see https://tweeterid.com/
+   * @example `422297024,873788249839370240`
+   */
+  follow?: string
+
+  /**
+   * A set of location bounding box to track
+   * @see [Twitter API - Locations](https://developer.twitter.com/en/docs/tweets/filter-realtime/guides/basic-stream-parameters)
+   * @example `-122.75,36.8,-121.75,37.8`
+   */
+  locations?: string
+
+  delimited?: 'length'
+
+  /**
+   * Amount of backfill of missed messages which occurred during the disconnect period between `-150000` to `150000`
+   * 
+   * @requires Twitter API elevated access
+   */
+  count?: string
+}
 
 //#region PostRequestBody
 
