@@ -122,6 +122,8 @@ interface TwitterOptions {
   subdomain?: string;
   /** version "1.1" is the default (change for other subdomains) */
   version?: string;
+  /** version "2" does not use .json for endpoints, defaults to true */
+  extension?: boolean;
   /** consumer key from Twitter. */
   consumer_key: string;
   /** consumer secret from Twitter */

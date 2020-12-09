@@ -30,6 +30,7 @@ const defaults = {
   access_token_secret: null,
   bearer_token: null,
   version: '1.1',
+  extension: true,
 };
 
 // Twitter expects POST body parameters to be URL-encoded: https://developer.twitter.com/en/docs/basics/authentication/guides/creating-a-signature
@@ -201,7 +202,7 @@ class Twitter {
    */
   _makeRequest(method, resource, parameters) {
     const requestData = {
-      url: `${this.url}/${resource}.json`,
+      url: `${this.url}/${resource}${this.config.extension ? '.json' : ''}`,
       method,
     };
     if (parameters)
@@ -313,7 +314,7 @@ class Twitter {
     // POST the request, in order to accommodate long parameter lists, e.g.
     // up to 5000 ids for statuses/filter - https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
     const requestData = {
-      url: `${getUrl('stream')}/${resource}.json`,
+      url: `${getUrl('stream')}/${resource}${this.config.extension ? '.json' : ''}`,
       method: 'POST',
     };
     if (parameters) requestData.data = parameters;
