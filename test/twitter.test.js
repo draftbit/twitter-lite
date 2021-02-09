@@ -45,6 +45,12 @@ describe('core', () => {
     expect(new Twitter().url).toEqual('https://api.twitter.com/1.1');
   });
 
+  it('should change the url on API change', () => {
+    const twitter = new Twitter();
+    twitter.setApi(2);
+    expect(twitter.url).toEqual('https://api.twitter.com/2');
+  });
+
   it('should return a stream API URL', () => {
     const options = { subdomain: 'stream' };
     expect(new Twitter(options).url).toEqual('https://stream.twitter.com/1.1');
