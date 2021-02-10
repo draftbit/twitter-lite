@@ -36,12 +36,12 @@
     "@types/node": "^13.13.4",
     "bundlesize": "^0.18.0",
     "dotenv": "^8.2.0",
+    "dtslint": "^4.0.6",
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^23.8.2",
     "flow-bin": "^0.123.0",
     "husky": "^4.2.5",
     "jest": "^25.5.0",
-    "dtslint": "^4.0.6",
     "microbundle": "^0.11.0",
     "typescript": "^3.8.2"
   },
@@ -58,7 +58,8 @@
     }
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testRegex": "/test/.*\\.test\\.js"
   },
   "bundlesize": [
     {
