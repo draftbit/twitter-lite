@@ -329,6 +329,70 @@ See the [OAuth example](#oauth-authentication).
 
 See the [OAuth example](#oauth-authentication).
 
+## Twitter Labs Support
+
+[Twitter Labs](https://developer.twitter.com/en/labs) is early access to new endpoints developed by Twitter. Using Twitter Labs requires explicit opt-in, therefore Twitter Labs functionalities are also supported in an opt-in manner.
+
+In order to create an instance that comes with Twitter Labs functionalities all you need to do is the following
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz"
+});
+
+/**
+ * will produce object instance with Twitter Labs
+ * functionalities in ADDITION to the base Twitter API functionalities
+ */
+const clientWithLabs = client.withLabs()
+```
+
+All the options fed to the base `Twitter` instance will be copied over to the instance with Twitter Labs support, and so you don't need to do any more setup.
+
+However, not all Twitter Labs APIs are supported currently. If an API is not yet implemented, you can consider making a PR! Please see [contribution guidelines](##contributing).
+
+### Supported Twitter Labs APIs
+
+#### Filtered streams
+
+Support for [Twitter Labs filtered streams](https://developer.twitter.com/en/docs/labs/filtered-stream/api-reference) is provided. The following is an example on how to use it:
+
+```es6
+const client = new Twitter({
+  consumer_key: "xyz",
+  consumer_secret: "xyz"
+});
+
+const bearerToken = await client.getBearerToken()
+
+const app = new Twitter({
+  bearer_token: bearerToken.access_token
+})
+const appWithLabs = app.withLabs()
+
+await appWithLabs.addRules([{value: 'twitter'}, {value: 'javascript'}])
+const stream = appWithLabs.filterStream()
+  .on("start", response => console.log("start"))
+  .on("data", tweet => console.log("data", tweet.text))
+  .on("ping", () => console.log("ping"))
+  .on("error", error => console.log("error", error))
+  .on("end", response => console.log("end"));
+
+// To stop the stream:
+process.nextTick(() => stream.destroy());  // emits "end" and "error" events
+```
+
+The streaming functionality uses the same underlying streaming capabilities as shown in the [stream section](##Streams).
+
+The methods to interact with the whole filtered stream API suite are:
+- `addRules(rules, dryRun)`
+- `getRules(...ids)`
+- `deleteRules(ids, dryRun)`
+- `filterStream(queryParams)`
+
+JSDoc and Typescript documentation are provided for all of them.
+
 ## Examples
 
 You can find many more examples for various resources/endpoints in [the tests](test).
@@ -390,7 +454,9 @@ With the library nearing v1.0, contributions are welcome! Areas especially in ne
     ACCESS_TOKEN=...
     ACCESS_TOKEN_SECRET=...
     ```
-5.  `yarn/npm test` and make sure all tests pass
+5.
+    - `yarn/npm test` and make sure all tests pass
+    - `yarn/npm run test-labs` to run Twitter Labs related tests and make sure all tests pass
 6.  Add your contribution, along with test case(s). Note: feel free to skip the ["should DM user"](https://github.com/draftbit/twitter-lite/blob/34e8dbb3efb9a45564275f16473af59dbc4409e5/twitter.test.js#L167) test during development by changing that `it()` call to `it.skip()`, but remember to revert that change before committing. This will prevent your account from being flagged as [abusing the API to send too many DMs](https://github.com/draftbit/twitter-lite/commit/5ee2ce4232faa07453ea2f0b4d63ee7a6d119ce7).
 7.  Make sure all tests pass. **NOTE: tests will take over 10 minutes to finish.**
 8.  Commit using a [descriptive message](https://chris.beams.io/posts/git-commit/) (please squash commits into one per fix/improvement!)
