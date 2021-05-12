@@ -300,6 +300,30 @@ class Twitter {
   }
 
   /**
+   * Send a DELETE request
+   * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
+   * @param {object} parameters - required or optional query parameters
+   * @param {object} body - DELETE request body
+   * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
+   */
+  delete(resource, parameters, body) {
+    const { requestData, headers } = this._makeRequest(
+      'DELETE',
+      resource,
+      parameters,
+    );
+
+    const deleteHeaders = Object.assign({}, baseHeaders, headers);
+    body = JSON.stringify(body);
+
+    return Fetch(requestData.url, {
+      method: 'DELETE',
+      headers: deleteHeaders,
+      body,
+    }).then(Twitter._handleResponse);
+  }
+
+  /**
    *
    * @param {string} resource - endpoint, e.g. `statuses/filter`
    * @param {object} parameters
