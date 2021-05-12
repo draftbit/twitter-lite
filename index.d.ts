@@ -104,6 +104,19 @@ export default class Twitter {
   ): Promise<T>;
 
   /**
+   * Send a DELETE request
+   * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/destroy`
+   * @param {object} parameters - required or optional query parameters
+   * @param {object} body - DELETE request body
+   * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
+   */
+   public delete<T = any>(
+    resource: string,
+    parameters: object,
+    body: object
+  ): Promise<T>;
+
+  /**
    * Open a stream to a specified endpoint
    *
    * @param {string} resource - endpoint, e.g. `statuses/filter`

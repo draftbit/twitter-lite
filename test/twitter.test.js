@@ -277,6 +277,41 @@ describe('putting', () => {
   });
 });
 
+describe('deleting', () => {
+  let client;
+  beforeAll(() => (client = newClient()));
+  /**
+   * For this test you need to have opted to receive messages from anyone at https://twitter.com/settings/safety
+   * and your demo app needs to have access to read, write, and direct messages.
+   */
+  fit('can delete welcome message', async () => {
+    const newWelcomeMessage = await client.post(
+      'direct_messages/welcome_messages/new',
+      {
+        welcome_message: {
+          name: 'simple_welcome-message 02',
+          message_data: {
+            text: 'Welcome!',
+          },
+        },
+      },
+    );
+
+    const deletedWelcomeMessage = await client.delete(
+      'direct_messages/welcome_messages/destroy',
+      {
+        id: newWelcomeMessage.welcome_message.id,
+      },
+    );
+    /**
+     * expect no content per Twitter API docs
+     * https://developer.twitter.com/en/docs/twitter-api/v1/direct-messages/welcome-messages/api-reference/delete-welcome-message
+     */
+    expect(deletedWelcomeMessage._headers).toHaveProperty('status', ['204 No Content']);
+
+  });
+});
+
 describe('misc', () => {
   let client;
   beforeAll(() => (client = newClient()));
