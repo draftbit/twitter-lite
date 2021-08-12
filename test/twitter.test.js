@@ -129,19 +129,19 @@ describe('rate limits', () => {
     async () => {
       expect.assertions(2); // assume we were rate limited by a previous test and go straight to `catch`
       try {
-        const response = await client.get('help/configuration');
+        const response = await client.get('help/languages');
         // Since this didn't throw, we'll be running 2 more assertions below
         expect.assertions(4);
-        expect(response).toHaveProperty('photo_sizes');
-        expect(response._headers).toHaveProperty('x-rate-limit-limit', ['15']);
-        let [remaining] = response._headers['x-rate-limit-remaining'];
+        expect(response).toHaveProperty('0.code');
+        expect(response._headers.get('x-rate-limit-limit')).toEqual('15');
+        let remaining = response._headers.get('x-rate-limit-remaining');
         while (
           remaining-- >= -1 // force exceeding the rate limit
         )
-          await client.get('help/configuration');
+          await client.get('help/languages');
       } catch (e) {
         expect(e.errors[0]).toHaveProperty('code', 88); // Rate limit exceeded
-        expect(e._headers).toHaveProperty('x-rate-limit-remaining', ['0']);
+        expect(e._headers.get('x-rate-limit-remaining')).toEqual('0');
       }
     },
     10 * 1000,
