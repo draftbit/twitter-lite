@@ -39,7 +39,7 @@
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^23.8.2",
     "flow-bin": "^0.123.0",
-    "husky": "^4.2.5",
+    "husky": "^7.0.1",
     "jest": "^25.5.0",
     "microbundle": "^0.13.3",
     "typescript": "^4.3.5"
@@ -47,14 +47,10 @@
   "scripts": {
     "lint": "eslint . && tsc index.d.ts",
     "fix": "eslint --fix .",
-    "prepare": "microbundle {stream,twitter}.js && bundlesize",
+    "build": "microbundle {stream,twitter}.js && bundlesize",
     "test": "jest --detectOpenHandles",
-    "release": "npm run -s prepare && npm run lint && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "eslint --fix ."
-    }
+    "release": "npm run -s build && npm run lint && npm test && git tag $npm_package_version && git push && git push --tags && npm publish",
+    "prepare": "husky install"
   },
   "jest": {
     "testEnvironment": "node"
