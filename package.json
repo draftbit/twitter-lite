@@ -48,8 +48,8 @@
     "lint": "eslint . && tsc index.d.ts",
     "fix": "eslint --fix .",
     "prepare": "microbundle {stream,twitter}.js && bundlesize",
-    "test": "eslint . && jest --detectOpenHandles",
-    "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
+    "test": "jest --detectOpenHandles",
+    "release": "npm run -s prepare && npm run lint && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
   },
   "husky": {
     "hooks": {
