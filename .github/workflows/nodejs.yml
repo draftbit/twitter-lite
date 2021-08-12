@@ -17,8 +17,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
-      - name: yarn install
-        run: yarn install
+      - name: Verify lockfile and install dependencies
+        run: yarn install --frozen-lockfile
       - name: lint
         run: yarn lint
       - name: test
