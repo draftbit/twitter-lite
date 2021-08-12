@@ -56,7 +56,7 @@ export default class Twitter {
 
   /**
    * Construct the data and headers for an authenticated HTTP request to the Twitter API
-   * @param {'GET | 'POST' | 'PUT'}
+   * @param {'GET | 'POST' | 'PUT'} method
    * @param {string} resource - the API endpoint
    */
   private _makeRequest(
