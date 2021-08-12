@@ -275,10 +275,10 @@ class Twitter {
   }
 
   /**
-   * Send a PUT request 
+   * Send a PUT request
    * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
    * @param {object} parameters - required or optional query parameters
-   * @param {object} body - PUT request body 
+   * @param {object} body - PUT request body
    * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
    */
   put(resource, parameters, body) {
