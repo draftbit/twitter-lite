@@ -125,9 +125,9 @@ interface TwitterOptions {
   /** version "2" does not use .json for endpoints, defaults to true */
   extension?: boolean;
   /** consumer key from Twitter. */
-  consumer_key: string;
+  consumer_key?: string;
   /** consumer secret from Twitter */
-  consumer_secret: string;
+  consumer_secret?: string;
   /** access token key from your User (oauth_token) */
   access_token_key?: OauthToken;
   /** access token secret from your User (oauth_token_secret) */
