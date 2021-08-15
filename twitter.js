@@ -200,7 +200,7 @@ class Twitter {
     switch(resource) {
     case 'media/upload':
     case 'media/metadata/create':
-      return getUrl('upload');
+      return getUrl('upload', this.config.version);
     default:
       return this.url;
     }
