@@ -1,6 +1,6 @@
 {
   "name": "twitter-lite",
-  "version": "0.14.0",
+  "version": "1.1.0",
   "description": "Tiny, full-featured client/server REST/stream library for the Twitter API",
   "source": "twitter.js",
   "main": "dist/twitter.js",
@@ -33,27 +33,24 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
-    "@types/node": "^13.13.4",
+    "@types/node": "^14.17.9",
     "bundlesize": "^0.18.0",
-    "dotenv": "^8.2.0",
+    "dotenv": "^10.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^23.8.2",
     "flow-bin": "^0.123.0",
-    "husky": "^4.2.5",
+    "husky": "^7.0.1",
     "jest": "^25.5.0",
-    "microbundle": "^0.11.0",
-    "typescript": "^3.8.2"
+    "microbundle": "^0.13.3",
+    "typescript": "^4.3.5"
   },
   "scripts": {
-    "lint": "eslint --fix ./",
-    "prepare": "microbundle {stream,twitter}.js && bundlesize",
-    "test": "eslint --fix . && jest --detectOpenHandles",
-    "release": "npm run -s prepare && npm test && git tag $npm_package_version && git push && git push --tags && npm publish"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "eslint --fix ."
-    }
+    "lint": "eslint . && tsc index.d.ts",
+    "fix": "eslint --fix .",
+    "build": "microbundle {stream,twitter}.js && bundlesize",
+    "test": "jest --detectOpenHandles",
+    "release": "npm run -s build && npm run lint && npm test && git tag $npm_package_version && git push && git push --tags && npm publish",
+    "prepare": "husky install"
   },
   "jest": {
     "testEnvironment": "node"

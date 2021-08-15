@@ -54,14 +54,14 @@ export default class Twitter {
 
   getAccessToken(options: AccessTokenOptions): Promise<AccessTokenResponse>;
 
-  /** Returns the appropriate url for the provided resource 
+  /** Returns the correct url for the provided resource 
    * @param {string} resource - The API endpoint
   */
   private _getResourceUrl(resource: string): string;
 
   /**
    * Construct the data and headers for an authenticated HTTP request to the Twitter API
-   * @param {'GET | 'POST' | 'PUT'}
+   * @param {'GET | 'POST' | 'PUT'} method
    * @param {string} resource - the API endpoint
    */
   private _makeRequest(
@@ -127,6 +127,8 @@ interface TwitterOptions {
   subdomain?: string;
   /** version "1.1" is the default (change for other subdomains) */
   version?: string;
+  /** version "2" does not use .json for endpoints, defaults to true */
+  extension?: boolean;
   /** consumer key from Twitter. */
   consumer_key: string;
   /** consumer secret from Twitter */

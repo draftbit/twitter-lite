@@ -30,6 +30,7 @@ const defaults = {
   access_token_secret: null,
   bearer_token: null,
   version: '1.1',
+  extension: true,
 };
 
 // Twitter expects POST body parameters to be URL-encoded: https://developer.twitter.com/en/docs/basics/authentication/guides/creating-a-signature
@@ -191,13 +192,14 @@ class Twitter {
     return results;
   }
 
-  /** Returns the appropriate url for the provided resource 
+  /** Returns the correct url for the provided resource 
    * @param {string} resource - The API endpoint
    * @private
   */
   _getResourceUrl(resource) {
     switch(resource) {
     case 'media/upload':
+    case 'media/metadata/create':
       return getUrl('upload');
     default:
       return this.url;
@@ -214,7 +216,7 @@ class Twitter {
    */
   _makeRequest(method, resource, parameters) {
     const requestData = {
-      url: `${this._getResourceUrl(resource)}/${resource}.json`,
+      url: `${this._getResourceUrl(resource)}/${resource}${this.config.extension ? '.json' : ''}`,
       method,
     };
     if (parameters)
@@ -287,10 +289,10 @@ class Twitter {
   }
 
   /**
-   * Send a PUT request 
+   * Send a PUT request
    * @param {string} resource - endpoint e.g. `direct_messages/welcome_messages/update`
    * @param {object} parameters - required or optional query parameters
-   * @param {object} body - PUT request body 
+   * @param {object} body - PUT request body
    * @returns {Promise<object>} Promise resolving to the response from the Twitter API.
    */
   put(resource, parameters, body) {
@@ -326,7 +328,7 @@ class Twitter {
     // POST the request, in order to accommodate long parameter lists, e.g.
     // up to 5000 ids for statuses/filter - https://developer.twitter.com/en/docs/tweets/filter-realtime/api-reference/post-statuses-filter
     const requestData = {
-      url: `${getUrl('stream')}/${resource}.json`,
+      url: `${getUrl('stream')}/${resource}${this.config.extension ? '.json' : ''}`,
       method: 'POST',
     };
     if (parameters) requestData.data = parameters;
