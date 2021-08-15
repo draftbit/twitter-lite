@@ -192,6 +192,20 @@ class Twitter {
     return results;
   }
 
+  /** Returns the correct url for the provided resource 
+   * @param {string} resource - The API endpoint
+   * @private
+  */
+  _getResourceUrl(resource) {
+    switch(resource) {
+    case 'media/upload':
+    case 'media/metadata/create':
+      return getUrl('upload', this.config.version);
+    default:
+      return this.url;
+    }
+  }
+
   /**
    * Construct the data and headers for an authenticated HTTP request to the Twitter API
    * @param {string} method - 'GET' or 'POST'
@@ -202,7 +216,7 @@ class Twitter {
    */
   _makeRequest(method, resource, parameters) {
     const requestData = {
-      url: `${this.url}/${resource}${this.config.extension ? '.json' : ''}`,
+      url: `${this._getResourceUrl(resource)}/${resource}${this.config.extension ? '.json' : ''}`,
       method,
     };
     if (parameters)

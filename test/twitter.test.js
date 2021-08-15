@@ -218,7 +218,7 @@ describe('posting', () => {
 
 describe('uploading', () => {
   let uploadClient;
-  beforeAll(() => (uploadClient = newClient('upload')));
+  beforeAll(() => (uploadClient = newClient()));
 
   it('should upload a picture, and add alt text to it', async () => {
     // Upload picture
