@@ -3,6 +3,9 @@ const OAuth = require('oauth-1.0a');
 const Fetch = require('cross-fetch');
 const querystring = require('querystring');
 const Stream = require('./stream');
+const oauthSignature = require('oauth-signature');
+const getRandomValues = require('get-random-values');
+
 
 const getUrl = (subdomain, endpoint = '1.1') =>
   `https://${subdomain}.twitter.com/${endpoint}`;
@@ -18,7 +21,6 @@ const createOauthClient = ({ key, secret }) => {
         .digest('base64');
     },
   });
-
   return client;
 };
 
@@ -37,12 +39,17 @@ const defaults = {
 // However, some endpoints expect a JSON payload - https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/new-event
 // It appears that JSON payloads don't need to be included in the signature,
 // because sending DMs works without signing the POST body
-const JSON_ENDPOINTS = [
+const JSON_ENDPOINTS1 = [
   'direct_messages/events/new',
   'direct_messages/welcome_messages/new',
   'direct_messages/welcome_messages/rules/new',
   'media/metadata/create',
   'collections/entries/curate',
+  'tweets',
+];
+
+const JSON_ENDPOINTS2 = [
+  'media/upload',
 ];
 
 const baseHeaders = {
@@ -244,6 +251,61 @@ class Twitter {
   }
 
   /**
+   * Create oauth signature
+   * @param {httpMethod} get || post || put || delete.
+   * @param {parameters} body - parameters object.
+   * @param {consumerSecret} consumerSecret.
+   * @param {tokenSecret} tokenSecret.
+   * @returns {<object>} Returns encodedSignature & signature
+   */
+  createOauthSignature(httpMethod, url, parameters, consumerSecret, tokenSecret) {
+    const params = {
+      httpMethod,
+      url,
+      parameters,
+      consumerSecret,
+      tokenSecret,
+    };
+    // generates a RFC 3986 encoded, BASE64 encoded HMAC-SHA1 hash
+    const encodedSignature = oauthSignature.generate(
+        params.httpMethod,
+        params.url,
+        params.parameters,
+        params.consumerSecret,
+        params.tokenSecret,
+      ),
+      // generates a BASE64 encode HMAC-SHA1 hash
+      signature = oauthSignature.generate(
+        params.httpMethod,
+        params.url,
+        params.parameters,
+        params.consumerSecret,
+        params.tokenSecret,
+        {
+          encodeSignature: false,
+        },
+      );
+    return {
+      encodedSignature,
+      signature,
+    };
+  }
+
+
+
+  /**
+   * Generates nonce
+   * @returns {<object>} Returns nonce
+   */
+  generateNonce() {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~';
+    const result = [];
+    getRandomValues(new Uint8Array(32)).forEach(c =>
+      result.push(charset[c % charset.length]));
+    return result.join('');
+  }
+
+  /**
    * Send a POST request
    * @param {string} resource - endpoint, e.g. `users/lookup`
    * @param {object} body - POST parameters object.
@@ -255,15 +317,41 @@ class Twitter {
     const { requestData, headers } = this._makeRequest(
       'POST',
       resource,
-      JSON_ENDPOINTS.includes(resource) ? null : body, // don't sign JSON bodies; only parameters
+      JSON_ENDPOINTS1.includes(resource) ? null : body, // don't sign JSON bodies; only parameters
     );
 
     const postHeaders = Object.assign({}, baseHeaders, headers);
-    if (JSON_ENDPOINTS.includes(resource)) {
+    if (JSON_ENDPOINTS1.includes(resource)) {
       body = JSON.stringify(body);
     } else {
+      if (JSON_ENDPOINTS2.includes(resource)) {
+        const nonce = this.generateNonce();
+        const timestamp = Math.floor((new Date()).getTime() / 1000);
+        const parameters = {
+          oauth_consumer_key : this.config.consumer_key,
+          oauth_token : this.config.access_token_key,
+          oauth_nonce : nonce,
+          oauth_timestamp : timestamp,
+          oauth_signature_method : this.client.signature_method,
+          oauth_version : this.client.version,
+          media_data : body['media_data'],
+        };
+        const signatureData = this.createOauthSignature('POST', requestData.url, parameters, this.config.consumer_secret, this.config.access_token_secret);
+        body['oauth_consumer_key'] = this.config.consumer_key;
+        body['oauth_nonce'] = nonce;
+        body['oauth_signature'] = signatureData.signature;
+        body['oauth_signature_method'] = this.client.signature_method;
+        body['oauth_timestamp'] = timestamp;
+        body['oauth_token'] = this.config.access_token_key;
+        body['oauth_version'] = this.client.version;
+      }
       body = percentEncode(querystring.stringify(body));
       postHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+      if (JSON_ENDPOINTS2.includes(resource)) {
+        postHeaders['Content-Transfer-Encoding'] = 'base64';
+        delete postHeaders['Accept'];
+        delete postHeaders['Authorization'];
+      }
     }
 
     return Fetch(requestData.url, {

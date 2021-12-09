@@ -29,7 +29,9 @@
   ],
   "dependencies": {
     "cross-fetch": "^3.0.0",
-    "oauth-1.0a": "^2.2.4"
+    "get-random-values": "^1.2.2",
+    "oauth-1.0a": "^2.2.4",
+    "oauth-signature": "^1.5.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",
