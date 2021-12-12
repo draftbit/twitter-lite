@@ -266,7 +266,7 @@ class Twitter {
       body = JSON.stringify(body);
     } else {
       body = percentEncode(querystring.stringify(body));
-      postHeaders["Content-Type"] = "application/x-www-form-urlencoded";
+      postHeaders["Content-Type"] = "application/json";
     }
 
     return Fetch(requestData.url, {
